@@ -1,0 +1,178 @@
+---
+title: "OBDD Figure 1 Script"
+output: html_notebook
+---
+
+```{r fig.width=12, fig.asp=1}
+# Install necessary packages if not already installed
+packages <- c("ape", "ggtree", "ggplot2", "cowplot", "reshape2", "FossilSim")
+installed_packages <- rownames(installed.packages())
+for (pkg in packages) {
+  if (!pkg %in% installed_packages)
+    install.packages(pkg)
+}
+
+# Load packages
+library(ape)
+library(ggtree)
+library(ggplot2)
+library(cowplot)
+library(reshape2)
+library(FossilSim)
+```
+
+
+```{r fig.width=8, fig.asp=0.8}
+# Set seed for reproducibility
+set.seed(123)
+
+# Simulate a phylogenetic tree
+tree <- rtree(n = 4)  # Smaller tree for clarity
+
+# Function to simulate diffusing rates along branches as Brownian motion
+simulate_rates_bm <- function(tree, rate_initial, sigma, alpha, rate_name) {
+  # Get the node ages
+  node_ages <- node.depth.edgelength(tree)
+  max_age <- max(node_ages)
+  
+  # Prepare data frame to store rates
+  rate_data <- data.frame()
+  
+  # Recursive function to traverse the tree and simulate rates
+  traverse_tree <- function(node, parent_rate, current_time) {
+    # Get children of the current node
+    children <- which(tree$edge[,1] == node)
+    
+    if (length(children) == 0) {
+      # Tip node
+      return()
+    }
+    
+    for (child_edge in children) {
+      child_node <- tree$edge[child_edge, 2]
+      branch_length <- tree$edge.length[child_edge]
+      dt <- 0.001
+      times <- seq(0, branch_length, length.out=branch_length/dt)
+      rates <- numeric(length(times))
+      rates[1] <- parent_rate
+      for (i in 2:length(times)) {
+        rates[i] <- rates[i-1] + rnorm(1, mean = 0, sd = sigma * sqrt(dt)) + alpha*dt
+      }
+      # Store the rates along the branch
+      branch_times <- current_time + times
+      rate_data <<- rbind(rate_data, data.frame(time = branch_times, rate = rates, lineage = child_node))
+      # Recurse into child node
+      traverse_tree(child_node, rates[length(rates)], current_time + branch_length)
+    }
+  }
+  
+  # Start traversal from the root
+  root_node <- Ntip(tree) + 1
+  traverse_tree(root_node, rate_initial, current_time = 0)
+  
+  rate_data$variable <- rate_name
+  rate_data$rate <- exp(rate_data$rate)  # geometric Brownnian motion
+  return(rate_data)
+}
+
+# Simulate speciation rates as Brownian motion
+speciation_rates <- simulate_rates_bm(tree, rate_initial = -0.5, sigma = 0.5, alpha=-1.5, rate_name = "Speciation Rate")
+
+# Simulate extinction rates as Brownian motion
+extinction_rates <- simulate_rates_bm(tree, rate_initial = -1.5, sigma = 0.5, alpha=0.2, rate_name = "Extinction Rate")
+
+# Combine rate data
+rate_data <- rbind(speciation_rates, extinction_rates)
+
+# Simulate piecewise-constant fossil sampling and occurrence sampling rates
+max_time <- max(node.depth.edgelength(tree))
+
+time_bins <- c(max_time, max_time*2/3, max_time/3, 0)
+sampling_rates <- data.frame(
+  time = time_bins,
+  occurrence_sampling_rate = c(50, 50, 7, 160),
+  fossil_sampling_rate = c(5, 5, 0.5, 4)
+)
+
+# Sample fossils
+fossils <- sim.fossils.intervals(tree=tree, interval.ages = rev(time_bins), rates = rev(sampling_rates$fossil_sampling_rate[-1]))
+occurrences <- sim.fossils.intervals(tree=tree, interval.ages = rev(time_bins), rates = rev(sampling_rates$occurrence_sampling_rate[-1]))
+
+# Melt data for plotting
+sampling_rates_melt <- melt(sampling_rates, id.vars = "time")
+
+# Combine rate data for plotting
+speciation_rates$variable <- "Speciation Rate"
+extinction_rates$variable <- "Extinction Rate"
+combined_rates <- rbind(speciation_rates, extinction_rates)
+
+# Plot combined rates over time with specified colors
+p_rates <- ggplot(combined_rates, aes(
+    x = max_time-time,
+    y = rate,
+    color = variable,
+    #alpha = rate,
+    group = interaction(lineage, variable)
+  )) +
+  geom_line(linewidth = 0.5, lineend = "round") +
+  scale_color_manual(
+    values = c("Speciation Rate" = "darkgreen", "Extinction Rate" = "darkred")
+  ) +
+  labs(
+    x = "Time",
+    y = "Diversification Rates",
+    #title = "Speciation and Extinction Rates Over Time",
+    color = ""
+  ) +
+  scale_x_reverse() +
+  guides(alpha = "none", colour = guide_legend(override.aes = list(linewidth=2))) +
+  theme_classic() +
+  theme(plot.title = element_text(hjust = 0.5),
+        legend.position = c(0.83,0.38),
+        axis.line.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.title.x=element_blank())
+
+# Plot sampling rates over time
+p_sampling <- ggplot(sampling_rates_melt, aes(x = time, y = value, color = variable)) +
+  geom_step(linewidth = 2, direction = "vh", lineend = "round") +
+  scale_color_manual(values = c("orange3", "orange4"), labels = c("Occurrence Sampling\nRate", "Fossil Sampling Rate")) +
+  labs(x = "Time", y = "Sampling Rates", color = "") +
+  scale_y_log10() +
+  scale_x_reverse() +
+  theme_classic() +
+  theme(plot.title = element_text(hjust = 0.5),
+        legend.position = c(0.85,0.73),
+        legend.background=element_blank(),
+        axis.line.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.text.x=element_blank())
+
+# Combine the tree and the combined rates plot
+par(omd = c(0, 1, 0.3, 1))
+plot(fossils, tree, fossil.col = "orange4", cex = 2, extant.col = "transparent", show.axis = T)
+par(new = TRUE, mar = c(0.5, 4, 4, 2) + 0.1, omd = c(0, 1, 0, 0.4))
+plot(occurrences$hmin, rnorm(nrow(occurrences), 0.0, 0.02), col=alpha("orange3", 0.5), pch=20,
+     xlim = c(2.04,-0.09), axes = F, xlab = "", ylab = "")
+
+pdf("Images/OBDD_phylogeny.pdf")
+par(omd = c(0, 1, 0.3, 1))
+plot(fossils, tree, fossil.col = "orange4", cex = 2, extant.col = "transparent", show.axis = T)
+par(new = TRUE, mar = c(0.5, 4, 4, 2) + 0.1, omd = c(0, 1, 0, 0.4))
+plot(occurrences$hmin, rnorm(nrow(occurrences), 0.0, 0.02), col=alpha("orange3", 0.5), pch=20,
+     xlim = c(2.04,-0.09), axes = F, xlab = "", ylab = "")
+dev.off()
+
+p <- plot_grid(
+  p_rates,
+  p_sampling,
+  ncol=1,
+  rel_heights = c(2,1),
+  align = "v"
+)
+p
+ggsave("Images/OBDD_rates.pdf", p)
+```
+
+

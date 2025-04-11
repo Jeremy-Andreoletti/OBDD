@@ -1,0 +1,18 @@
+#1 - Describe the name of your executable, and the optional arguments
+executable = /usr/local/bin/julia
+universe = vanilla
+accounting_group = ShortJob
+notification = complete
+
+#2 - Describe the name of the files where the stdout, stderr and log of your job should get redirected:
+error = /data/biodiv/andreole/INSANE_OBD/Cetacea/Logs/CBD.$(Cluster).$(Process).stderr
+log = /data/biodiv/andreole/INSANE_OBD/Cetacea/Logs/CBD.$(Cluster).$(Process).log
+
+#3 - Describe the resources requirements of your job : 
+request_memory = 1 GB
+request_cpus = 1
+
+#4 - Submit your job
+arguments = /data/biodiv/andreole/INSANE_OBD/Cetacea/Cetacea_CBD.jl $(seed)
+
+queue seed from seq 0 4 |

@@ -1,0 +1,37 @@
+000 (14464.004.000) 2024-12-05 14:47:32 Job submitted from host: <10.18.24.233:9618?addrs=10.18.24.233-9618&alias=bioclusts03.bioclust.biologie.ens.fr&noUDP&sock=schedd_910141_9a29>
+...
+001 (14464.004.000) 2024-12-05 14:47:32 Job executing on host: <10.18.24.13:9618?addrs=10.18.24.13-9618&alias=bioclust13.bioclust.biologie.ens.fr&noUDP&sock=startd_1738935_599d>
+...
+006 (14464.004.000) 2024-12-05 14:47:41 Image size of job updated: 641340
+	396  -  MemoryUsage of job (MB)
+	405092  -  ResidentSetSize of job (KB)
+...
+006 (14464.004.000) 2024-12-05 14:52:42 Image size of job updated: 1634988
+	611  -  MemoryUsage of job (MB)
+	625196  -  ResidentSetSize of job (KB)
+...
+006 (14464.004.000) 2024-12-05 15:02:43 Image size of job updated: 1634988
+	623  -  MemoryUsage of job (MB)
+	637872  -  ResidentSetSize of job (KB)
+...
+006 (14464.004.000) 2024-12-05 15:04:25 Image size of job updated: 1634988
+	624  -  MemoryUsage of job (MB)
+	638136  -  ResidentSetSize of job (KB)
+...
+005 (14464.004.000) 2024-12-05 15:04:25 Job terminated.
+	(1) Normal termination (return value 0)
+		Usr 0 00:14:42, Sys 0 00:01:44  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+		Usr 0 00:14:42, Sys 0 00:01:44  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	0  -  Total Bytes Sent By Job
+	0  -  Total Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated 
+	   Cpus                 :     1.00        1         1 
+	   Disk (KB)            :    15          15      3344 
+	   Memory (MB)          :   624        1024      1024 
+
+	Job terminated of its own accord at 2024-12-05T14:04:25Z with exit-code 0.
+...
