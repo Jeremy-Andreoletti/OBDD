@@ -1,0 +1,97 @@
+000 (13118.080.000) 2024-06-07 17:04:00 Job submitted from host: <10.18.24.233:9618?addrs=10.18.24.233-9618&alias=bioclusts03.bioclust.biologie.ens.fr&noUDP&sock=schedd_942_b64d>
+...
+001 (13118.080.000) 2024-06-07 19:55:36 Job executing on host: <10.18.24.41:9618?addrs=10.18.24.41-9618&alias=bioclust41.bioclust.biologie.ens.fr&noUDP&sock=startd_1116_0fc8>
+...
+006 (13118.080.000) 2024-06-07 19:55:44 Image size of job updated: 179000
+	154  -  MemoryUsage of job (MB)
+	157504  -  ResidentSetSize of job (KB)
+...
+006 (13118.080.000) 2024-06-07 20:00:44 Image size of job updated: 1594988
+	558  -  MemoryUsage of job (MB)
+	570876  -  ResidentSetSize of job (KB)
+...
+006 (13118.080.000) 2024-06-07 20:05:45 Image size of job updated: 1605284
+	577  -  MemoryUsage of job (MB)
+	590400  -  ResidentSetSize of job (KB)
+...
+006 (13118.080.000) 2024-06-07 20:10:46 Image size of job updated: 1612680
+	591  -  MemoryUsage of job (MB)
+	604200  -  ResidentSetSize of job (KB)
+...
+006 (13118.080.000) 2024-06-07 20:15:46 Image size of job updated: 1620864
+	603  -  MemoryUsage of job (MB)
+	617472  -  ResidentSetSize of job (KB)
+...
+006 (13118.080.000) 2024-06-07 20:20:46 Image size of job updated: 1624692
+	612  -  MemoryUsage of job (MB)
+	626356  -  ResidentSetSize of job (KB)
+...
+006 (13118.080.000) 2024-06-07 20:25:47 Image size of job updated: 1634056
+	624  -  MemoryUsage of job (MB)
+	638924  -  ResidentSetSize of job (KB)
+...
+006 (13118.080.000) 2024-06-07 20:30:47 Image size of job updated: 1642304
+	636  -  MemoryUsage of job (MB)
+	651240  -  ResidentSetSize of job (KB)
+...
+006 (13118.080.000) 2024-06-07 20:35:47 Image size of job updated: 1645872
+	644  -  MemoryUsage of job (MB)
+	658560  -  ResidentSetSize of job (KB)
+...
+006 (13118.080.000) 2024-06-07 20:40:48 Image size of job updated: 1652208
+	657  -  MemoryUsage of job (MB)
+	672048  -  ResidentSetSize of job (KB)
+...
+006 (13118.080.000) 2024-06-07 20:45:49 Image size of job updated: 1659912
+	664  -  MemoryUsage of job (MB)
+	679172  -  ResidentSetSize of job (KB)
+...
+006 (13118.080.000) 2024-06-07 20:50:49 Image size of job updated: 1665588
+	677  -  MemoryUsage of job (MB)
+	692732  -  ResidentSetSize of job (KB)
+...
+006 (13118.080.000) 2024-06-07 20:55:50 Image size of job updated: 1672780
+	682  -  MemoryUsage of job (MB)
+	698192  -  ResidentSetSize of job (KB)
+...
+006 (13118.080.000) 2024-06-07 21:00:51 Image size of job updated: 1676740
+	689  -  MemoryUsage of job (MB)
+	705160  -  ResidentSetSize of job (KB)
+...
+006 (13118.080.000) 2024-06-07 21:05:51 Image size of job updated: 1683840
+	709  -  MemoryUsage of job (MB)
+	725208  -  ResidentSetSize of job (KB)
+...
+006 (13118.080.000) 2024-06-07 21:10:51 Image size of job updated: 1689648
+	709  -  MemoryUsage of job (MB)
+	726000  -  ResidentSetSize of job (KB)
+...
+006 (13118.080.000) 2024-06-07 21:15:52 Image size of job updated: 1695912
+	716  -  MemoryUsage of job (MB)
+	733004  -  ResidentSetSize of job (KB)
+...
+006 (13118.080.000) 2024-06-07 21:20:52 Image size of job updated: 1701192
+	726  -  MemoryUsage of job (MB)
+	743056  -  ResidentSetSize of job (KB)
+...
+006 (13118.080.000) 2024-06-07 21:25:52 Image size of job updated: 1775252
+	736  -  MemoryUsage of job (MB)
+	753056  -  ResidentSetSize of job (KB)
+...
+005 (13118.080.000) 2024-06-08 13:05:37 Job terminated.
+	(1) Normal termination (return value 0)
+		Usr 0 17:04:57, Sys 0 00:03:26  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+		Usr 0 17:04:57, Sys 0 00:03:26  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	0  -  Total Bytes Sent By Job
+	0  -  Total Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated 
+	   Cpus                 :     1.00        1         1 
+	   Disk (KB)            :    15          15      1615 
+	   Memory (MB)          :   736       20480     20480 
+
+	Job terminated of its own accord at 2024-06-08T11:05:37Z with exit-code 0.
+...

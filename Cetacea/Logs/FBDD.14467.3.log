@@ -318,3 +318,8 @@
 	977  -  MemoryUsage of job (MB)
 	1000448  -  ResidentSetSize of job (KB)
 ...
+009 (14467.003.000) 2025-05-27 12:13:39 Job was aborted.
+	via condor_rm (by user andreole)
+
+	Job terminated by itself at 2025-03-31T09:48:11Z (using method 0: OF_ITS_OWN_ACCORD).
+...

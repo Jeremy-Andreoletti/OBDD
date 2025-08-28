@@ -3,10 +3,10 @@ library(readr)
 library(lubridate)
 library(coda)
 
-setwd("~/Nextcloud/Recherche/1_Methods/INSANE/OBDP/Cetacea_OBD/")
+setwd("~/Nextcloud/Recherche/1_Methods/INSANE/OBDD/Cetacea/")
 
 # Extract timestamps and calculate duration
-calculate_duration <- function(log_file) {
+calculate_duration <- function(log_file, trace_file) {
   # Read all lines from the log file
   log_lines <- read_lines(log_file)
   
@@ -17,18 +17,22 @@ calculate_duration <- function(log_file) {
   timestamps <- sub(".*\\((\\d+\\.\\d+\\.\\d+)\\) (\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}).*", "\\2", timestamp_lines)
   
   # Convert the timestamps to POSIXct format
-  time_values <- ymd_hms(timestamps)
+  time_values <- ymd_hms(timestamps, tz = "CET")
   
-  # Check if "Job terminated" is in the log file
-  if (any(grepl("Job terminated|Job exceeded its runtime limit", log_lines))) {
-    # Extract the timestamp of the job termination
-    end_time <- max(time_values)
-  } else {
-    # If the job is still running, use the current time
-    end_time <- Sys.time()
-  }
+  # Get the time of last modification
+  end_time <- file.info(trace_file)$mtime
+  # # Check if "Job terminated" is in the log file
+  # if (any(grepl("Job terminated|Job exceeded its runtime limit", log_lines))) {
+  #   # Extract the timestamp of the job termination
+  #   end_time <- max(time_values)
+  # } else {
+  #   # If the job is still running, use the current time
+  #   end_time <- Sys.time()
+  # }
   
   # Calculate the duration between the first timestamp and the end time in hours
+  # print(min(time_values))
+  # print(end_time)
   duration <- difftime(end_time, min(time_values), units = "days")
   
   return(as.numeric(duration))
@@ -39,6 +43,7 @@ calculate_duration <- function(log_file) {
 compute_ess <- function(trace_file) {
   # Read the trace data from the log file
   trace_data <- read.table(trace_file, header = TRUE)
+  print(dim(trace_data))
   trace_data_reduced <- trace_data[!grepl("iteration|div|ne|ns", names(trace_data))]
   trace_data_reduced <- trace_data_reduced[colSums(sapply(trace_data_reduced, diff)) != 0]
   
@@ -59,7 +64,7 @@ get_essperday <- function(log_path, trace_path){
     trace_file <- paste0(trace_path, seed, ".log")
     
     ess <- compute_ess(trace_file)
-    duration <- calculate_duration(log_file)
+    duration <- calculate_duration(log_file, trace_file)
     ess_per_day <- ess / duration
     
     # Append the results to the data frame

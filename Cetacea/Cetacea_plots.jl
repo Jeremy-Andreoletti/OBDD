@@ -9,6 +9,7 @@ using StatsBase
 using Random: seed!
 using Distributed
 using Plots
+using Measures
 
 ## Read in data
 trees_rec = read_newick("Data/Cetacea_Safe_posterior.trees", true)
@@ -85,23 +86,27 @@ for (model_name, files) in model_groups
         tree_type = typeof(out_trees_seed0[lastindex(out_trees_seed0)])
         last_tree_seed0 = tree_type(out_trees_seed0[lastindex(out_trees_seed0)])
         reorder!(last_tree_seed0)
-        plot(last_tree_seed0, xlab = "Time before present", 
+        plot(last_tree_seed0, xlab = "Time before present", tickfontsize = 13, guidefontsize = 17, left_margin = 2mm, bottom_margin = 3mm, top_margin = 3mm, 
              shownodes=(false, false, true), showda=true, shsizes=[1.0, 1.0, 1.0], size=(500,500))
         savefig("Images/$(ofile)_tree.pdf")
 
         median_tree_seed0 = iquantile(remove_unsampled.(out_trees_seed0), 0.5)
         reorder!(median_tree_seed0)
-        plot(median_tree_seed0, b, shownodes=(false, false, false), xlab = "Time before present", size=(500,500))
+        plot(median_tree_seed0, b, shownodes=(false, false, false), xlab = "Time before present", 
+             tickfontsize = 13, guidefontsize = 17, left_margin = 2mm, bottom_margin = 3mm, top_margin = 3mm, size=(500,500))
         savefig("Images/$(ofile)_seed0_tree_λ.pdf")
-        plot(median_tree_seed0, d, shownodes=(false, false, false), xlab = "Time before present", size=(500,500))
+        plot(median_tree_seed0, d, shownodes=(false, false, false), xlab = "Time before present", 
+             tickfontsize = 13, guidefontsize = 17, left_margin = 2mm, bottom_margin = 3mm, top_margin = 3mm, size=(500,500))
         savefig("Images/$(ofile)_seed0_tree_μ.pdf")
-        plot(median_tree_seed0, nd, shownodes=(false, false, false), xlab = "Time before present", size=(500,500))
+        plot(median_tree_seed0, nd, shownodes=(false, false, false), xlab = "Time before present", 
+             tickfontsize = 13, guidefontsize = 17, left_margin = 2mm, bottom_margin = 3mm, top_margin = 3mm, size=(500,500))
         savefig("Images/$(ofile)_seed0_tree_nd.pdf")
 
         out_trees = reduce(vcat, out_trees)
         @show length(out_trees)
         plot(out_trees, b, δt, fillcolor="#005AB5", linecolor=:darkblue, ylim=(0,1.5))
-        plot!(out_trees, d, δt, xlab = "Time before present", ylab="Speciation and extinction rates", fillcolor="#DC3220", linecolor=:darkred)
+        plot!(out_trees, d, δt, xlab = "Time before present", ylab="Diversification rates", fillcolor="#DC3220", linecolor=:darkred, 
+              tickfontsize = 13, guidefontsize = 17, left_margin = 2mm, bottom_margin = 3mm, top_margin = 3mm)
         savefig("Images/$(ofile)_λTT_μTT.pdf")
     else
         if occursin(r"COBD", model_name)
@@ -112,24 +117,29 @@ for (model_name, files) in model_groups
         @show length(out_trees)
 
         plot(combined_traces.lambda, tor, fillcolor="#005AB5", linecolor=:darkblue, ylim=(0,1.5))
-        plot!(combined_traces.mu, tor, fillcolor="#DC3220", linecolor=:darkred, ylim=(0,1.5), xlab = "Time before present", ylab = "Speciation and extinction rates")
+        plot!(combined_traces.mu, tor, fillcolor="#DC3220", linecolor=:darkred, ylim=(0,1.5), 
+              xlab = "Time before present", ylab = "Diversification rates", 
+              tickfontsize = 13, guidefontsize = 17, left_margin = 2mm, bottom_margin = 3mm, top_margin = 3mm)
         savefig("Images/$(ofile)_λTT_μTT.pdf")
     end
 
     ψω_epoch = Float64[33.9, 28.1, 23.03, 20.44, 7.246, 5.333]
     if occursin(r"OBD", model_name)
         omega_traces = [combined_traces[!, col] for col in names(combined_traces, r"omega")]
-        plot(omega_traces, tor, ψω_epoch, fillcolor=:chocolate1, linecolor=:chocolate3, ylim=(0,1.1), xlab = "Time before present", ylab = "Sampling rate")
+        plot(omega_traces, tor, ψω_epoch, fillcolor=:chocolate1, linecolor=:chocolate3, ylim=(0,1.1), xlab = "Time before present", 
+             ylab = "Sampling rate", tickfontsize = 13, guidefontsize = 17, left_margin = 2mm, bottom_margin = 3mm, top_margin = 3mm)
         if occursin(r"rmFossils", model_name)
             savefig("Images/$(ofile)_ωTT.pdf")
         else
             psi_traces = [combined_traces[!, col] for col in names(combined_traces, r"psi")]
-            plot!(psi_traces, tor, ψω_epoch, fillcolor=:darkorange4, linecolor=:darkorange4, ylim=(0,1.1), xlab = "Time before present", ylab = "Sampling rates")
+            plot!(psi_traces, tor, ψω_epoch, fillcolor=:darkorange4, linecolor=:darkorange4, ylim=(0,1.1), xlab = "Time before present", 
+                  ylab = "Sampling rates", tickfontsize = 13, guidefontsize = 17, left_margin = 2mm, bottom_margin = 3mm, top_margin = 3mm)
             savefig("Images/$(ofile)_ψTT_ωTT.pdf")
         end
     elseif occursin(r"FBD", model_name)
         psi_traces = [combined_traces[!, col] for col in names(combined_traces, r"psi")]
-        plot(psi_traces, tor, ψω_epoch, fillcolor=:darkorange4, linecolor=:darkorange4, ylim=(0,1.1), xlab = "Time before present", ylab = "Sampling rate")
+        plot(psi_traces, tor, ψω_epoch, fillcolor=:darkorange4, linecolor=:darkorange4, ylim=(0,1.1), xlab = "Time before present", 
+             ylab = "Sampling rate", tickfontsize = 13, guidefontsize = 17, left_margin = 2mm, bottom_margin = 3mm, top_margin = 3mm)
         savefig("Images/$(ofile)_ψTT.pdf")
     end
         
@@ -138,14 +148,16 @@ for (model_name, files) in model_groups
     end
     mp4(anim_tree, "Animations/$(ofile)_anim_tree.mp4", fps=5)
 
-    plot(ltt.(out_trees), 0.05, ylim=(1,400), scale=:identity, xlab = "Time before present", ylab="Number of lineages")
+    plot(ltt.(out_trees), 0.05, ylim=(1,400), scale=:identity, xlab = "Time before present", ylab="Number of lineages", 
+         tickfontsize = 13, guidefontsize = 17, left_margin = 2mm, bottom_margin = 3mm, top_margin = 3mm)
     for seed_nb in 0:4
         seed!(seed_nb)
         tree = rand(trees_rec)
         if occursin(r"^BDD|CBD|rmFossils", model_name)
             tree = remove_fossils(tree)
         end
-        plot!(ltt(tree), scale=:identity, xlab = "Time before present", ylab="Number of lineages")
+        plot!(ltt(tree), scale=:identity, xlab = "Time before present", ylab="Number of lineages", 
+              tickfontsize = 13, guidefontsize = 17, left_margin = 2mm, bottom_margin = 3mm, top_margin = 3mm)
     end
     savefig("Images/$(ofile)_LTT.pdf")
     

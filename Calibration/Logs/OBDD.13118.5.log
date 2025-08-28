@@ -1,0 +1,97 @@
+000 (13118.005.000) 2024-06-07 17:03:58 Job submitted from host: <10.18.24.233:9618?addrs=10.18.24.233-9618&alias=bioclusts03.bioclust.biologie.ens.fr&noUDP&sock=schedd_942_b64d>
+...
+001 (13118.005.000) 2024-06-07 17:09:09 Job executing on host: <10.18.24.5:9618?addrs=10.18.24.5-9618&alias=bioclust05.bioclust.biologie.ens.fr&noUDP&sock=startd_1161_ed8b>
+...
+006 (13118.005.000) 2024-06-07 17:09:18 Image size of job updated: 870212
+	304  -  MemoryUsage of job (MB)
+	310556  -  ResidentSetSize of job (KB)
+...
+006 (13118.005.000) 2024-06-07 17:14:19 Image size of job updated: 1590824
+	603  -  MemoryUsage of job (MB)
+	616464  -  ResidentSetSize of job (KB)
+...
+006 (13118.005.000) 2024-06-07 17:19:19 Image size of job updated: 1594556
+	606  -  MemoryUsage of job (MB)
+	620324  -  ResidentSetSize of job (KB)
+...
+006 (13118.005.000) 2024-06-07 17:24:19 Image size of job updated: 1595092
+	606  -  MemoryUsage of job (MB)
+	620324  -  ResidentSetSize of job (KB)
+...
+006 (13118.005.000) 2024-06-07 17:29:20 Image size of job updated: 1596028
+	606  -  MemoryUsage of job (MB)
+	620324  -  ResidentSetSize of job (KB)
+...
+006 (13118.005.000) 2024-06-07 17:34:21 Image size of job updated: 1596696
+	610  -  MemoryUsage of job (MB)
+	624272  -  ResidentSetSize of job (KB)
+...
+006 (13118.005.000) 2024-06-07 17:39:21 Image size of job updated: 1597228
+	610  -  MemoryUsage of job (MB)
+	624404  -  ResidentSetSize of job (KB)
+...
+006 (13118.005.000) 2024-06-07 17:44:22 Image size of job updated: 1597904
+	610  -  MemoryUsage of job (MB)
+	624404  -  ResidentSetSize of job (KB)
+...
+006 (13118.005.000) 2024-06-07 17:49:23 Image size of job updated: 1598308
+	612  -  MemoryUsage of job (MB)
+	626644  -  ResidentSetSize of job (KB)
+...
+006 (13118.005.000) 2024-06-07 17:54:23 Image size of job updated: 1599248
+	612  -  MemoryUsage of job (MB)
+	626644  -  ResidentSetSize of job (KB)
+...
+006 (13118.005.000) 2024-06-07 17:59:23 Image size of job updated: 1600464
+	613  -  MemoryUsage of job (MB)
+	627620  -  ResidentSetSize of job (KB)
+...
+006 (13118.005.000) 2024-06-07 18:04:24 Image size of job updated: 1601392
+	613  -  MemoryUsage of job (MB)
+	627620  -  ResidentSetSize of job (KB)
+...
+006 (13118.005.000) 2024-06-07 18:09:24 Image size of job updated: 1602600
+	613  -  MemoryUsage of job (MB)
+	627620  -  ResidentSetSize of job (KB)
+...
+006 (13118.005.000) 2024-06-07 18:14:24 Image size of job updated: 1603652
+	613  -  MemoryUsage of job (MB)
+	627620  -  ResidentSetSize of job (KB)
+...
+006 (13118.005.000) 2024-06-07 18:19:25 Image size of job updated: 1604468
+	613  -  MemoryUsage of job (MB)
+	627620  -  ResidentSetSize of job (KB)
+...
+006 (13118.005.000) 2024-06-07 18:24:26 Image size of job updated: 1605640
+	613  -  MemoryUsage of job (MB)
+	627620  -  ResidentSetSize of job (KB)
+...
+006 (13118.005.000) 2024-06-07 18:29:26 Image size of job updated: 1606848
+	618  -  MemoryUsage of job (MB)
+	632732  -  ResidentSetSize of job (KB)
+...
+006 (13118.005.000) 2024-06-07 18:34:27 Image size of job updated: 1607780
+	618  -  MemoryUsage of job (MB)
+	632732  -  ResidentSetSize of job (KB)
+...
+006 (13118.005.000) 2024-06-07 18:38:06 Image size of job updated: 1608708
+	618  -  MemoryUsage of job (MB)
+	632732  -  ResidentSetSize of job (KB)
+...
+005 (13118.005.000) 2024-06-07 18:38:06 Job terminated.
+	(1) Normal termination (return value 0)
+		Usr 0 01:27:55, Sys 0 00:00:21  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+		Usr 0 01:27:55, Sys 0 00:00:21  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	0  -  Total Bytes Sent By Job
+	0  -  Total Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated 
+	   Cpus                 :     0.99        1         1 
+	   Disk (KB)            :    15          15      2245 
+	   Memory (MB)          :   618       20480     20480 
+
+	Job terminated of its own accord at 2024-06-07T16:38:06Z with exit-code 0.
+...

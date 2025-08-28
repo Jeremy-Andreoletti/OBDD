@@ -1,0 +1,45 @@
+000 (13112.038.000) 2024-06-07 15:12:16 Job submitted from host: <10.18.24.233:9618?addrs=10.18.24.233-9618&alias=bioclusts03.bioclust.biologie.ens.fr&noUDP&sock=schedd_942_b64d>
+...
+001 (13112.038.000) 2024-06-07 15:12:19 Job executing on host: <10.18.24.182:9618?addrs=10.18.24.182-9618&alias=mcbsclust11.bioclust.biologie.ens.fr&noUDP&sock=startd_1538_84bf>
+...
+006 (13112.038.000) 2024-06-07 15:12:28 Image size of job updated: 665904
+	173  -  MemoryUsage of job (MB)
+	176668  -  ResidentSetSize of job (KB)
+...
+006 (13112.038.000) 2024-06-07 15:17:29 Image size of job updated: 1556916
+	529  -  MemoryUsage of job (MB)
+	541532  -  ResidentSetSize of job (KB)
+...
+006 (13112.038.000) 2024-06-07 15:22:29 Image size of job updated: 1564856
+	542  -  MemoryUsage of job (MB)
+	554732  -  ResidentSetSize of job (KB)
+...
+006 (13112.038.000) 2024-06-07 15:27:29 Image size of job updated: 1572660
+	552  -  MemoryUsage of job (MB)
+	564500  -  ResidentSetSize of job (KB)
+...
+006 (13112.038.000) 2024-06-07 15:32:30 Image size of job updated: 1579692
+	561  -  MemoryUsage of job (MB)
+	573556  -  ResidentSetSize of job (KB)
+...
+006 (13112.038.000) 2024-06-07 15:37:26 Image size of job updated: 1586824
+	561  -  MemoryUsage of job (MB)
+	573556  -  ResidentSetSize of job (KB)
+...
+005 (13112.038.000) 2024-06-07 15:37:26 Job terminated.
+	(1) Normal termination (return value 0)
+		Usr 0 00:24:55, Sys 0 00:00:02  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+		Usr 0 00:24:55, Sys 0 00:00:02  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	0  -  Total Bytes Sent By Job
+	0  -  Total Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated 
+	   Cpus                 :     0.98        1         1 
+	   Disk (KB)            :    15          15      2368 
+	   Memory (MB)          :   561       20480     20480 
+
+	Job terminated of its own accord at 2024-06-07T13:37:26Z with exit-code 0.
+...

@@ -56,7 +56,7 @@ mxthf    = Inf
 tρ       = Dict("" => 1.0)
 
 ## MCMC
-dat_path = "datasets_calibration/dataset$i/"
+dat_path = "datasets_calibration_OBDD/dataset$i/"
 @show dat_path
 
 out_file = "outputs/OBDD_SimulatedOBDD_dataset$(i)_$(niter)iter"

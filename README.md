@@ -1,7 +1,20 @@
 # Overview
-This project introduces the Occurrence Birth-Death Diffusion model and studies the diversification dynamics of cetaceans.
+This project introduces the **Occurrence Birth-Death Diffusion (OBDD)** model and applies it to study the diversification dynamics of cetaceans.  
+It builds on the [`Tapestree.jl`](https://github.com/ignacioq/Tapestree.jl) framework, with additional functionality currently available only in the `insane` branch of my fork.
 
-Some files are too large for this repository: trees from https://academic.oup.com/sysbio/article/70/5/922/6122448, model outputs that can be regenerated with the Julia scripts.
+# Installation
+
+Until these changes are merged upstream, you need to install Tapestree directly from the fork:
+
+```julia
+using Pkg
+Pkg.add(url="https://github.com/Jeremy-Andreoletti/Tapestree.jl", rev="insane")
+```
+Note: If you already had Tapestree installed, first run:
+
+```julia
+Pkg.rm("Tapestree")
+```
 
 # Directory Structure and Description
 - `Calibration`: Validating the OBDD model.

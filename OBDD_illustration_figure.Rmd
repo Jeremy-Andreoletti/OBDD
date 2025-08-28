@@ -21,13 +21,12 @@ library(reshape2)
 library(FossilSim)
 ```
 
-
 ```{r fig.width=8, fig.asp=0.8}
 # Set seed for reproducibility
 set.seed(123)
 
 # Simulate a phylogenetic tree
-tree <- rtree(n = 4)  # Smaller tree for clarity
+tree <- rtree(n = 4)
 
 # Function to simulate diffusing rates along branches as Brownian motion
 simulate_rates_bm <- function(tree, rate_initial, sigma, alpha, rate_name) {
@@ -76,10 +75,10 @@ simulate_rates_bm <- function(tree, rate_initial, sigma, alpha, rate_name) {
 }
 
 # Simulate speciation rates as Brownian motion
-speciation_rates <- simulate_rates_bm(tree, rate_initial = -0.5, sigma = 0.5, alpha=-1.5, rate_name = "Speciation Rate")
+speciation_rates <- simulate_rates_bm(tree, rate_initial = -0.5, sigma = 0.5, alpha=-1.5, rate_name = "Speciation")
 
 # Simulate extinction rates as Brownian motion
-extinction_rates <- simulate_rates_bm(tree, rate_initial = -1.5, sigma = 0.5, alpha=0.2, rate_name = "Extinction Rate")
+extinction_rates <- simulate_rates_bm(tree, rate_initial = -1.5, sigma = 0.5, alpha=0.2, rate_name = "Extinction")
 
 # Combine rate data
 rate_data <- rbind(speciation_rates, extinction_rates)
@@ -102,8 +101,8 @@ occurrences <- sim.fossils.intervals(tree=tree, interval.ages = rev(time_bins), 
 sampling_rates_melt <- melt(sampling_rates, id.vars = "time")
 
 # Combine rate data for plotting
-speciation_rates$variable <- "Speciation Rate"
-extinction_rates$variable <- "Extinction Rate"
+speciation_rates$variable <- "Speciation"
+extinction_rates$variable <- "Extinction"
 combined_rates <- rbind(speciation_rates, extinction_rates)
 
 # Plot combined rates over time with specified colors
@@ -116,7 +115,7 @@ p_rates <- ggplot(combined_rates, aes(
   )) +
   geom_line(linewidth = 0.5, lineend = "round") +
   scale_color_manual(
-    values = c("Speciation Rate" = "darkgreen", "Extinction Rate" = "darkred")
+    values = c("Speciation" = "darkgreen", "Extinction" = "darkred")
   ) +
   labs(
     x = "Time",
@@ -137,7 +136,7 @@ p_rates <- ggplot(combined_rates, aes(
 # Plot sampling rates over time
 p_sampling <- ggplot(sampling_rates_melt, aes(x = time, y = value, color = variable)) +
   geom_step(linewidth = 2, direction = "vh", lineend = "round") +
-  scale_color_manual(values = c("orange3", "orange4"), labels = c("Occurrence Sampling\nRate", "Fossil Sampling Rate")) +
+  scale_color_manual(values = c("orange3", "orange4"), labels = c("Occurrences", "Phylogenetic\nFossils")) +
   labs(x = "Time", y = "Sampling Rates", color = "") +
   scale_y_log10() +
   scale_x_reverse() +
@@ -175,4 +174,303 @@ p
 ggsave("Images/OBDD_rates.pdf", p)
 ```
 
+```{r fig.width=10, fig.asp=0.75, message=FALSE, warning=FALSE}
+# ---- deps ----
+library(ape)
+library(paleotree)
+library(ggplot2)
+library(reshape2)
+library(cowplot)
+library(grid)
+library(scales)   # for alpha()
+library(gridGraphics)
+
+set.seed(123)
+
+# ---- simulation (unchanged core) ----
+tree <- rtree(n = 4)
+
+simulate_rates_bm <- function(tree, rate_initial, sigma, alpha, rate_name) {
+  node_ages <- node.depth.edgelength(tree)
+  max_age <- max(node_ages)
+  rate_data <- data.frame()
+  traverse_tree <- function(node, parent_rate, current_time) {
+    children <- which(tree$edge[,1] == node)
+    if (length(children) == 0) return()
+    for (child_edge in children) {
+      child_node <- tree$edge[child_edge, 2]
+      branch_length <- tree$edge.length[child_edge]
+      dt <- 0.001
+      steps <- max(2L, as.integer(branch_length/dt) + 1L)
+      times <- seq(0, branch_length, length.out = steps)
+      rates <- numeric(length(times))
+      rates[1] <- parent_rate
+      for (i in 2:length(times)) {
+        rates[i] <- rates[i-1] + rnorm(1, mean = 0, sd = sigma * sqrt(dt)) + alpha*dt
+      }
+      branch_times <- current_time + times
+      rate_data <<- rbind(rate_data, data.frame(time = branch_times, rate = rates, lineage = child_node))
+      traverse_tree(child_node, rates[length(rates)], current_time + branch_length)
+    }
+  }
+  root_node <- Ntip(tree) + 1
+  traverse_tree(root_node, rate_initial, current_time = 0)
+  rate_data$variable <- rate_name
+  rate_data$rate <- exp(rate_data$rate)  # geometric BM
+  rate_data
+}
+
+speciation_rates <- simulate_rates_bm(tree, rate_initial = -0.5, sigma = 0.5, alpha = -1.5, rate_name = "Speciation")
+extinction_rates <- simulate_rates_bm(tree, rate_initial = -1.5, sigma = 0.5, alpha = 0.2,  rate_name = "Extinction")
+
+combined_rates <- rbind(speciation_rates, extinction_rates)
+
+max_time <- max(node.depth.edgelength(tree))
+time_bins <- c(max_time, max_time*2/3, max_time/3, 0)
+
+sampling_rates <- data.frame(
+  time = time_bins,
+  occurrence_sampling_rate = c(50, 50, 7, 160),
+  fossil_sampling_rate     = c(5,   5,  0.5, 4)
+)
+
+# Fossils / occurrences per piecewise-constant bins
+fossils <- sim.fossils.intervals(tree = tree,
+                                 interval.ages = rev(time_bins),
+                                 rates = rev(sampling_rates$fossil_sampling_rate[-1]))
+occurrences <- sim.fossils.intervals(tree = tree,
+                                     interval.ages = rev(time_bins),
+                                     rates = rev(sampling_rates$occurrence_sampling_rate[-1]))
+
+sampling_rates_melt <- melt(sampling_rates, id.vars = "time",
+                            variable.name = "variable", value.name = "value")
+```
+
+
+```{r fig.width=12, fig.asp=0.8, message=FALSE, warning=FALSE}
+# ---- common axis + typography ----
+base_size <- 16
+x_limits  <- c(max_time, 0)
+x_breaks  <- pretty(c(0, max_time), n = 3)   # works for reversed scales
+x_labels  <- format(x_breaks)                 # shared labels
+
+theme_set(
+  theme_classic(base_size = base_size) +
+    theme(panel.background = element_rect(fill = NA, colour = NA),
+          plot.background  = element_rect(fill = NA, colour = NA),
+          legend.background = element_blank(),
+          legend.key        = element_rect(fill = NA, colour = NA))
+)
+
+# ---- left column: starting conditions ----
+
+# (L1) Root at start-of-time, on the shared time axis
+p_root <- {
+  df_root <- data.frame(x = max_time, y = 0)
+  ggplot(df_root, aes(x, y)) +
+    #geom_hline(yintercept = 0, linewidth = 0.6) +
+    geom_point(shape = 21, size = 4.5, stroke = 1.2, fill = "white", color = "black") +
+    annotate("text", x = max_time, y = 0, label = "Root", vjust = -1.5, size = 5) +
+    scale_x_reverse(limits = x_limits*1.05, breaks = x_breaks, labels = x_labels) +
+    labs(x = "Time", y = "Phylogeny with fossils") +
+    theme(axis.line.y=element_blank(),
+          axis.ticks.y=element_blank(),
+          axis.text.y=element_blank(),
+          axis.line.x=element_blank(),
+          axis.ticks.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.title.x=element_blank(),
+          panel.background = element_blank())
+}
+
+# (L2) Initial λ0, μ0 as circles at t = start-of-time, on the same axis
+y_limits <- range(c(combined_rates$rate, exp(c(-0.3, -1.5))), na.rm = TRUE)
+p_init_rates <- {
+  init_df <- data.frame(
+    time     = c(max_time, max_time),
+    rate     = exp(c(-0.5, -1.5)),
+    variable = c("Speciation", "Extinction"),
+    lab      = c("lambda[0]", "mu[0]")
+  )
+  ggplot(init_df, aes(x = time, y = rate)) +
+    geom_point(aes(fill = variable), shape = 21, size = 5, stroke = 1.1, color = "black") +
+    geom_text(aes(label = lab), parse = TRUE, vjust = -1.1, size = 5) +
+    scale_fill_manual(values = c("Speciation" = "darkgreen",
+                                 "Extinction" = "darkred")) +
+    scale_x_reverse(limits = x_limits, breaks = x_breaks, labels = x_labels) +
+    coord_cartesian(ylim = y_limits) +
+    labs(x = "Time", y = "Diversification rates") +
+    theme(legend.position = "none",
+          axis.line.x=element_blank(),
+          axis.ticks.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.title.x=element_blank())
+}
+
+# (L3) Sampling schedule (piecewise-constant) on the same time axis
+p_sampling <- ggplot(sampling_rates_melt, aes(x = time, y = value, color = variable)) +
+  geom_step(linewidth = 1.2, direction = "vh", lineend = "round") +
+  scale_color_manual(
+    values = c(occurrence_sampling_rate = "orange3",
+               fossil_sampling_rate     = "orange4"),
+    labels = c("Occurrences", "\nPhylogenetic\nFossils\n")  # << forces extra gap
+  ) +
+  scale_y_log10() +
+  scale_x_reverse(limits = x_limits, breaks = x_breaks, labels = x_labels) +
+  labs(x = "Time", y = "Sampling rates", color = NULL) +
+  guides(color = guide_legend(override.aes = list(linewidth = 2))) +
+  theme(
+    legend.position = c(0.83, 0.62),
+    legend.text     = element_text(size = base_size * 0.9),
+    legend.background = element_blank(),
+    legend.key        = element_rect(fill = "transparent", colour = NA)
+  )
+
+# ---- right column: end observations ----
+
+# (R1) Phylogeny with fossils + occurrences (capture base plot as grob)
+phylo_grob <- grid::grid.grabExpr({
+  gridGraphics::grid.echo(function() {
+    
+    # --- kill all base-graphics padding so the plot fills its box ---
+    op <- par(
+      oma = c(0,0,0,0),
+      mar = c(0,0,0,0),
+      xaxs = "i", yaxs = "i",     # no 4% expansion
+      mgp  = c(0,0,0),
+      tcl  = 0,
+      plt  = c(0,1,0,1)           # use 100% of the device region
+    )
+    on.exit(par(op), add = TRUE)
+    plot(fossils, tree,
+         fossil.col = "orange4", cex = 2,
+         extant.col = "transparent", show.axis = F)
+  })
+})
+
+p_phylo <- ggplot() +
+  annotation_custom(phylo_grob, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf) +
+  geom_point(aes(x = 1.877, y = 6.2), shape = 21, size = 4.5, stroke = 1.2,
+             fill = "white", color = "black") +
+  ylim(0,10) +
+  scale_x_reverse(limits = c(max_time,0), breaks = x_breaks, labels = x_labels) +
+  theme_void() +
+  theme(plot.margin = margin(0,0,0,0))
+
+# (R2) Diversification trajectories + initial λ0/μ0, same x axis and uniform y text
+ref_right <- data.frame(
+  x        = c(max_time, max_time),
+  y        = exp(c(-0.5, -1.5)),
+  variable = c("Speciation", "Extinction"),
+  lab      = c("lambda[0]", "mu[0]")
+)
+
+p_rates <- ggplot(combined_rates, aes(
+  x = max_time - time,  # present on the right
+  y = rate,
+  color = variable,
+  group = interaction(lineage, variable)
+)) +
+  geom_line(linewidth = 0.6, lineend = "round") +
+  # duplicate circles at present (no legend mapping here)
+  geom_point(data = ref_right,
+             aes(x = x, y = y),
+             inherit.aes = FALSE,
+             shape = 21, size = 4.5, stroke = 1.1,
+             fill = c("darkgreen","darkred"), color = "black") +
+  scale_color_manual(values = c("Speciation" = "darkgreen",
+                                "Extinction" = "darkred"),
+                     breaks = c("Speciation","Extinction")) +
+  scale_x_reverse(limits = x_limits*1.07, breaks = x_breaks, labels = x_labels) +
+  coord_cartesian(ylim = y_limits) +
+  labs(x = "Time", y = "Diversification rates", color = NULL) +
+  guides(colour = guide_legend(override.aes = list(linewidth = 2))) +
+  theme(
+    legend.position = c(0.22, 0.85),   # inside, top-left corner
+    legend.justification = c("left", "top"),
+    legend.text = element_text(size = base_size * 0.9),
+    legend.box.margin = margin(t = -4),
+    axis.line.x=element_blank(),
+    axis.ticks.x=element_blank(),
+    axis.text.x=element_blank(),
+    axis.title.x=element_blank(),
+    axis.line.y=element_blank(),
+    axis.ticks.y=element_blank(),
+    axis.text.y=element_blank(),
+    axis.title.y=element_blank())
+
+# (R3) Occurrences jittered, same time axis
+occ_df <- data.frame(time = occurrences$hmin,
+                     y = stats::rnorm(nrow(occurrences), 0, 0.02))
+p_occ <- ggplot(occ_df, aes(x = time, y = y)) +
+  geom_point(pch = 20, size = 4, alpha = 0.6, color = "orange3") +
+  scale_x_reverse(limits = x_limits, breaks = x_breaks, labels = x_labels) +
+  labs(x = "Time", y = "Occurrences") +
+  theme(axis.line.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank())
+
+# (optional) Make y-label sizes across panels uniform
+p_sampling <- p_sampling + theme(axis.title.y = element_text(size = base_size))
+p_occ      <- p_occ      + theme(axis.title.y = element_text(size = base_size))
+
+# ---- layout: 3×3 grid ----
+left_col  <- plot_grid(p_root, p_init_rates, p_sampling, ncol = 1, rel_heights = c(1, 0.9, 1))
+right_col <- plot_grid(p_phylo, p_rates, p_occ,     ncol = 1, rel_heights = c(1, 0.9, 1))
+
+# middle column left blank for spacing/context (or duplicate titles if desired)
+# Here we add slim spacers to get a true 3×3 while keeping focus on L/R columns.
+spacer <- ggplot() + theme_void()
+middle_col <- plot_grid(spacer, spacer, spacer, ncol = 1, rel_heights = c(1,1,1))
+
+final_3x3 <- plot_grid(
+  left_col, middle_col, right_col,
+  ncol = 3, rel_widths = c(1, 0.08, 1)
+)
+
+# optional titles over each column
+title_left  <- ggdraw() + draw_label("Starting conditions", fontface = "bold", size = 16)
+title_right <- ggdraw() + draw_label("Simulation outcomes", fontface = "bold", size = 16)
+titles <- plot_grid(title_left, spacer, title_right, ncol = 3, rel_widths = c(1, 0.08, 1))
+
+final_plot <- plot_grid(titles, final_3x3, ncol = 1, rel_heights = c(0.08, 1))
+ggsave("Images/Figure_1_OBDD_process.pdf", final_plot, width = 12, height = 9)
+final_plot
+```
+
+```{r fig.width=12, fig.asp=0.8, message=FALSE, warning=FALSE}
+# ---- wrap a column in a grey box ----
+wrap_in_box <- function(plot_obj, fill = "grey95", color = "grey80") {
+  ggdraw() +
+    # draw background rectangle
+    geom_rect(aes(xmin = 0, xmax = 1, ymin = 0, ymax = 1),
+              fill = fill, color = color, linewidth = 0.5, inherit.aes = FALSE) +
+    # then draw the actual plot on top
+    draw_plot(plot_obj)
+}
+
+# wrap left and right columns
+left_col_box  <- wrap_in_box(left_col)
+right_col_box <- wrap_in_box(right_col)
+
+# middle column left blank
+spacer <- ggplot() + theme_void()
+middle_col <- plot_grid(spacer, spacer, spacer, ncol = 1, rel_heights = c(1,1,1))
+
+# combine
+final_3x3 <- plot_grid(
+  left_col_box, middle_col, right_col_box,
+  ncol = 3, rel_widths = c(1, 0.04, 1)
+)
+
+# titles
+title_left  <- ggdraw() + draw_label("Starting conditions", fontface = "bold", size = 18)
+title_right <- ggdraw() + draw_label("Simulation outcomes", fontface = "bold", size = 18)
+titles <- plot_grid(title_left, spacer, title_right, ncol = 3, rel_widths = c(1, 0.08, 1))
+
+final_plot <- plot_grid(titles, final_3x3, ncol = 1, rel_heights = c(0.08, 1))
+
+# ---- output ----
+final_plot
+```
 

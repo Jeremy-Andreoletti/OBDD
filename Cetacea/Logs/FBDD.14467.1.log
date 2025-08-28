@@ -362,3 +362,8 @@
     startd address: <10.18.24.13:9618?addrs=10.18.24.13-9618&alias=bioclust13.bioclust.biologie.ens.fr&noUDP&sock=startd_1738935_599d>
     starter address: <10.18.24.13:9618?addrs=10.18.24.13-9618&alias=bioclust13.bioclust.biologie.ens.fr&noUDP&sock=slot1_8_1738986_b3f4_5953>
 ...
+009 (14467.001.000) 2025-05-27 12:13:39 Job was aborted.
+	via condor_rm (by user andreole)
+
+	Job terminated by itself at 2025-03-31T09:47:33Z (using method 0: OF_ITS_OWN_ACCORD).
+...

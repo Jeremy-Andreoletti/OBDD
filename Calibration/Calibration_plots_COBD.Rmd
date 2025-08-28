@@ -1,0 +1,616 @@
+---
+title: "Calibration Plots"
+output:
+  pdf_document: 
+    fig_height: 5.5
+    fig_width: 10
+    toc: yes
+  html_notebook:
+    code_folding: hide
+  html_document:
+    fig_width: 10
+    toc: yes
+---
+
+Creation - jeremy.andreoletti@ens.fr - 05/06/2020
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r echo=FALSE}
+library(ape)
+library(phytools)
+library(FossilSim)
+library(dplyr)
+library(tidyr)
+library(tibble)
+library(ggplot2)
+```
+
+# Single dataset
+## Load files
+
+MCMC trace 
+
+```{r}
+dataset_nb <- 1
+#readLines(paste0("datasets_calibration_COBD/dataset", dataset_nb, "/tree_full.tre"))
+tree_full <- read.newick(paste0("datasets_calibration_COBD/dataset", dataset_nb, "/tree_full.tre"))
+tree_reconstructed <- read.newick(paste0("datasets_calibration_COBD/dataset", dataset_nb, "/tree_reconstructed.tre"))
+
+plotTree(tree_full)
+if (!is.null(tree_full$node.label)){
+  labelnodes(text=tree_full$node.label,node=1:tree_full$Nnode+Ntip(tree_full),interactive=FALSE,circle.exp=0.8,cex=0.7)
+}
+plotTree(tree_reconstructed, show.node.label=T)
+if (!is.null(tree_reconstructed$node.label)){
+  labelnodes(text=tree_reconstructed$node.label,node=1:tree_reconstructed$Nnode+Ntip(tree_reconstructed),interactive=FALSE,circle.exp=0.8,cex=0.7)
+  }
+```
+
+
+```{r}
+trace_file <- paste0("outputs/COBD_SimulatedCOBD_dataset", dataset_nb, "_500000iter_seed", dataset_nb, ".log")
+
+trace <- read.table(trace_file, header=T)
+names(trace) <- sub("lambda","λ",sub("mu","μ",sub("psi_","ψ",sub("omega_","ω",names(trace)))))
+head(trace)
+
+#node_ages <- function(tree) return (paleotree::dateNodes(tree, rootAge = tree.max(tree)))
+```
+
+True values used in the simulations
+
+```{r}
+params_file <- paste("datasets_calibration_COBD/dataset", dataset_nb, "/params.csv", sep="")
+params <- read.table(params_file, header=T) %>% gather(par, value)
+params <- params[1:6,]
+params
+```
+
+## Compute the quantiles for the 100*alpha% credible interval
+
+Example with $\alpha=0.95$
+
+```{r}
+alpha <- 0.95
+quantile(trace$λ, probs = c(0.5-alpha/2, 0.5+alpha/2))
+```
+
+```{r fig.width=12, fig.asp=0.4}
+hist(trace$λ, breaks = 50, border = alpha("darkgreen", 0.3), probability = T, col = alpha("lightgreen", 0.3),
+     xlab = expression(λ), cex.main = 1.2, cex.lab = 1.5, 
+     main = "Posterior distribution of lambda, the true value (red) is included in some credible intervals (green)")
+for (alpha in 1:9/10) {
+  lines(c(quantile(trace$λ, probs = c(0.5-alpha/2, 0.5+alpha/2))), c(1-alpha,1-alpha)*0.5, col="forestgreen", lwd=3)
+  text(x = quantile(trace$λ, probs = 0.5+alpha/2)+0.1, y = (1-alpha)*0.5, labels = paste(alpha*100, "%"), cex=1.5, font=2)
+  }
+points(params[params$par=="λ",]$value, 0, col="red3", pch = 19, cex=2)
+#invisible(dev.print(svg, "Images/Simulation_Based_Calibration_lambda.svg"))
+```
+
+```{r fig.width=12, fig.asp=0.4}
+hist(trace$μ, breaks = 50, border = alpha("darkblue", 0.3), probability = T, col = alpha("lightblue", 0.3),
+     xlab = expression(mu), cex.main = 1.2, cex.lab = 1.5, 
+     main = "Posterior distribution of mu, the true value (red) is included in some credible intervals (blue)")
+for (alpha in 1:9/10) {
+  lines(c(quantile(trace$μ, probs = c(0.5-alpha/2, 0.5+alpha/2))), c(1-alpha,1-alpha)*0.5, col="blue3", lwd=3)
+  text(x = quantile(trace$μ, probs = 0.5+alpha/2)+0.05, y = (1-alpha)*0.5, labels = paste(alpha*100, "%"), cex=1.5, font=2)
+  }
+points(params[params$par=="μ",]$value, 0, col="red3", pch = 19, cex=2)
+#invisible(dev.print(svg, "Images/Simulation_Based_Calibration_psi.svg"))
+```
+
+Check for 20 $\alpha$ values and all parameters if the true value is included in the $100\alpha\%$ credible interval
+
+```{r}
+credible_interval <- function(par, alpha, trace){
+  # Compute the interval range for a given alpha
+  return (quantile(trace[,as.character(par)], probs = c(0.5-alpha/2, 0.5+alpha/2)))
+}
+
+for (alpha in 1:19/20) {
+  credible_intervals <- sapply(params$par, credible_interval, alpha, trace)
+  params[paste("alpha_", alpha, "_inf", sep="")] <- credible_intervals[1,]   # Inferior limit of the credible interval
+  params[paste("alpha_", alpha, "_sup", sep="")] <- credible_intervals[2,]   # Superior limit of the credible interval
+  # Check if the true values are included in the credible intervals
+  params[paste("alpha_", alpha, "_in", sep="")] <- as.logical((params$value > params[paste("alpha_", alpha, "_inf", sep="")]) & 
+                                                              (params$value < params[paste("alpha_", alpha, "_sup", sep="")]))
+}
+params
+```
+
+# All available datasets, OBDP
+
+```{r}
+credible_interval <- function(par, alpha, trace){
+  # Compute the interval range for a given alpha
+  return (quantile(trace[,as.character(par)], probs = c(0.5-alpha/2, 0.5+alpha/2)))
+}
+```
+
+```{r}
+#dataset_nbs <- as.integer(gsub("dataset", "", list.files("datasets_calibration")))
+
+# This line extracts dataset numbers from the filenames of log files in the "outputs" folder.
+# The gsub function is used to remove the "COBD_SimulatedCOBD_dataset" and "_500000iter.log" parts from the filenames.
+# The list.files function lists all files in the "outputs" folder that match the pattern ".*500000iter_seed", dataset_nb, ".log".
+dataset_nbs <- as.integer(gsub("COBD_SimulatedCOBD_dataset.*_500000iter_seed|.log", "", list.files("outputs", pattern="COBD_SimulatedCOBD.*500000iter.*log")))
+
+# These variables define the parameters for the analysis. They are set to their default values.
+burnin_p <- 0              # Remove a given initial percentage of the MCMC trees
+burnout_p <- 1             # Remove a given final percentage of the MCMC trees
+rmtips <- 0                # Remove small trees with up to ... tips
+subsampling_interval <- 1  # Subsample only one tree every each given interval in the trace to reduce autocorrelation
+
+interval_inclusions <- c()   # Create an empty data frame to store the results
+parameters <- c()            # Create an empty data frame to store the results
+
+for (dataset_nb in dataset_nbs) {
+
+  # MCMC trace - Construct the path of the current log file based on the dataset number
+  trace_file <- paste0("outputs/COBD_SimulatedCOBD_dataset", dataset_nb, "_500000iter_seed", dataset_nb, ".log")
+
+  # Read the MCMC trace from the log file, skipping rows based on the subsampling interval
+  trace <- read.table(trace_file, header=T)[c(T,rep(F, subsampling_interval-1)),]
+  
+  # Rename the columns of the trace data with their corresponding mathematical symbols
+  names(trace) <- sub("lambda","λ",sub("mu","μ",sub("psi_","ψ",sub("omega_","ω",names(trace)))))
+  
+  # Read the reconstructed tree from a Newick file based on the dataset number
+  tree_reconstructed <- read.newick(paste0("datasets_calibration_COBD/dataset", dataset_nb, "/tree_reconstructed.tre"))
+  
+  # Get the total number of tips and extant tips in the tree
+  ntips <- Ntip(tree_reconstructed)
+  ntipsextant <- length(getExtant(tree_reconstructed))
+  nfossils <- sum(grepl("f", c(tree_reconstructed$tip.label, tree_reconstructed$node.label)))
+  
+  if (file.size(paste0("datasets_calibration_COBD/dataset", dataset_nb, "/occurrences.csv")) > 0){
+    occurrences <- read.csv(paste0("datasets_calibration_COBD/dataset", dataset_nb, "/occurrences.csv"), header = F)
+    nocc <- nrow(occurrences)
+  }else{
+    nocc <- 0
+  }
+  
+  # Check if the number of tips in the tree is greater than the threshold for removing small trees
+  if (ntips > rmtips) {
+  
+    # If burnin_p/burnout_p is non-zero, remove the corresponding percentage of initial/final MCMC trees
+    if (burnin_p != 0) trace <- trace[-c(1:round(burnin_p*dim(trace)[1])),]
+    if (burnout_p != 0) trace <- trace[-c(round(burnout_p*dim(trace)[1]):dim(trace)[1]),]
+    
+    # Read the true parameter values used in the simulations from a CSV file based on the dataset number
+    # Convert the resulting data frame to a long format using the gather function from the dplyr package
+    # Select the first 6 rows of the resulting data frame
+    params_file <- paste("datasets_calibration_COBD/dataset", dataset_nb, "/params.csv", sep="")
+    params <- read.table(params_file, header=T) %>% gather(par, value)
+    params <- params[1:6,]
+    
+    # Create a data frame with information about the dataset number, parameter name, true value, and median value from the MCMC trace
+    parameters <- rbind(parameters, data.frame(dataset_nb = rep(dataset_nb,nrow(params)),
+                                               par = params$par,
+                                               true_value = params$value,
+                                               median_aPosteriori = sapply(trace[params$par], median),
+                                               mean_aPosteriori = colMeans(trace[params$par]),
+                                               var_aPosteriori = sapply(trace[params$par], var),
+                                               MSE = colMeans(t(t(trace[params$par]) - params$value)**2),  # also equal to var_aPosteriori + (mean_aPosteriori - true_value)**2
+                                               NMSE = colMeans(t(t(trace[params$par]) - params$value)**2)/params$value**2,
+                                               ntips = ntips,
+                                               ntipsextant = ntipsextant, 
+                                               nfossils = nfossils,
+                                               nocc = nocc,
+                                               row.names = NULL))
+    
+    # Loop over different alpha values in the range of 1/20 to 19/20
+    for (alpha in 1:19/20) {
+      
+      # Compute the credible intervals for each parameter using the credible_interval function
+      # The alpha value is passed as an argument to the function
+      credible_intervals <- sapply(params$par, credible_interval, alpha, trace)
+      
+      # Add columns to the params data frame representing the inferior limit and superior limit of the credible interval
+      params[paste("alpha_", alpha, "_inf", sep="")] <- credible_intervals[1,]
+      params[paste("alpha_", alpha, "_sup", sep="")] <- credible_intervals[2,]
+
+      # Add a column to the params data frame indicating whether the true value falls within the credible interval
+      params[paste("alpha_", alpha, "_in", sep="")] <- as.logical((params$value > params[paste("alpha_", alpha, "_inf", sep="")]) & 
+                                                                  (params$value < params[paste("alpha_", alpha, "_sup", sep="")]))
+      
+    }
+    
+    interval_inclusions <- rbind(interval_inclusions, data.frame(dataset_nb=rep(dataset_nb,nrow(params)),params[,c(1,grep("in$", names(params)))]))
+  }
+}
+
+interval_inclusions
+```
+
+Compute the **truth recovery proportion** = percentage of datasets recovering the true value in their $100\alpha\%$ credible interval
+
+```{r}
+# Define a function to compute the truth recovery proportion given a parameter 'par'
+truth_recovery_proportion <- function (par) {
+  return(colMeans(interval_inclusions[interval_inclusions$par == par, c(-1, -2)]))
+}
+
+# Apply the truth recovery proportion function to each parameter in 'params$par'
+recovery <- data.frame(sapply(as.vector(params$par), truth_recovery_proportion))
+recovery
+```
+
+```{r}
+# Reorganize the 'recovery' dataframe for plotting
+recovery_plot <- recovery %>% 
+  rownames_to_column(var = "Alpha") %>% 
+  pivot_longer(-c("Alpha"), names_to = "Parameters", values_to = "Proportions")
+
+# Extract the 'Alpha' values from the row names and convert them to numeric
+recovery_plot$Alpha <- as.double(gsub("alpha_|_in", "", recovery_plot$Alpha))
+
+recovery_plot
+```
+
+## Compare the empirical truth recovery proportion with the credible interval width, since the two are expected to correspond.
+
+```{r}
+# Create a mapping from your strings to their corresponding expressions
+parameter_labels <- c("λ" = expression(lambda),
+                      "μ" = expression(mu),
+                      "ψ1" = expression(psi[1]),
+                      "ψ2" = expression(psi[2]),
+                      "ω1" = expression(omega[1]),
+                      "ω2" = expression(omega[2]))
+
+# Apply this mapping to the Parameters column in your data
+recovery_plot$ParametersExpr <- factor(recovery_plot$Parameters, 
+                                       levels = names(parameter_labels),
+                                       labels = parameter_labels)
+
+# Binomial proportion confidence interval
+z <- 1.96
+nb <- length(dataset_nbs)
+recovery_plot$CI <- z*sqrt(recovery_plot$Proportions*(1-recovery_plot$Proportions)/nb)
+```
+
+```{r fig.width=10, fig.asp = .25, message=FALSE}
+p <- ggplot(recovery_plot, aes(x=Alpha, y=Proportions, color="Simulations")) +
+  annotate("segment", x = 0, y = 0, xend = 1, yend=1, colour='gray35', lwd=0.2)+
+  geom_point(alpha=0.7, color = 'chartreuse4', cex=1) +
+  geom_errorbar(aes(ymin=sapply(Proportions-CI, max, 0), ymax=sapply(Proportions+CI, min, 1)), width=.04, alpha=0.4, colour='chartreuse4')+
+  scale_x_continuous(name = "Credible interval width", breaks=c(0,1)) +
+  scale_y_continuous(name = "Truth recovery\nproportion", lim=c(0,1)) +
+  facet_grid(. ~ ParametersExpr, labeller=label_parsed) +
+  theme(panel.grid = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1, size=8),
+        axis.text.y = element_text(size=8),
+        legend.position = "none")
+p + ggtitle("Simulation-based evaluation of model calibration")
+
+ggsave(paste0("Images/COBD_truth_recovery_proportions", ifelse(rmtips>0, paste0("_rm", rmtips, "tip", ifelse(rmtips>1, "s", "")), ""), ".pdf"), p, width=8, height=1.8)
+```
+
+## Compare the median a posteriori prediction to the true parameter values
+
+```{r fig.width=14, fig.asp = .2, message=FALSE}
+parameters$ParametersExpr <- factor(parameters$par, 
+                                    levels = names(parameter_labels),
+                                    labels = parameter_labels)
+
+range_par <- sapply(unique(parameters$par), function(P)range(parameters[parameters$par==P,]$median_aPosteriori, na.rm=T))
+parameters$par_min <- range_par[1,]
+parameters$par_max <- range_par[2,]
+
+p <- ggplot(parameters, aes(x=true_value, y=median_aPosteriori, color="Simulations")) +
+  geom_segment(aes(x=par_min, y=par_min, xend=par_max, yend=par_max, color="Perfect match"), alpha=0.7)+
+  geom_point(alpha=0.1) +
+  scale_x_log10(name = "True value used in simulation") +
+  scale_y_log10(name = "Inferred median\na posteriori") + 
+  scale_color_manual(name="Correspondence", values=c('gray35','darkblue'),
+                     guide = guide_legend(override.aes = list(linetype = c("solid", "blank"), shape = c(NA, 16)))) +
+  ggtitle("Simulation-based evaluation of model median predictions") +
+  facet_wrap(. ~ ParametersExpr, scales="free", nrow=1, labeller = label_parsed) +
+  theme(panel.grid = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1, size=8),
+        axis.text.y = element_text(size=8),
+        legend.position = "none")
+p
+
+ggsave(paste0("Images/COBD_median_predictions", ifelse(rmtips>0, paste0("_rm", rmtips, "tip", ifelse(rmtips>1, "s", "")), ""), ".pdf"), p, width=12, height=2.5)
+```
+
+## Compare the evolution of the prediction error with tree size
+
+```{r fig.width=14, fig.asp = .2, message=FALSE}
+#parameters$true_value <- sapply(parameters$true_value, max, 1e-4)
+parameters$error = parameters$median_aPosteriori/parameters$true_value
+p <- ggplot(parameters, aes(x=ntips, y=error, color="Simulations")) +
+  geom_point(alpha=0.1, colour = 'darkred') +
+  annotate("segment", x = 1, xend = max(parameters$ntips), y = 1, yend = 1, colour = "gray30", alpha=0.7, linewidth=1) +
+  scale_x_log10(name = "Number of tips") +
+  scale_y_log10(name = "Prediction error\nMedian/True") + 
+  ggtitle("Relative error in model median predictions for increasing tree size") +
+  facet_wrap(. ~ ParametersExpr, scales="free", nrow=1, labeller=label_parsed) +
+  theme(panel.grid = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1, size=8),
+        axis.text.y = element_text(size=8),
+        legend.position = "none")
+p
+```
+
+```{r fig.width=14, fig.asp = .2, message=FALSE}
+p <- ggplot(parameters, aes(x=ntips, y=NMSE)) +
+  geom_point(alpha=0.15, size=0.8, colour = 'darkred') +
+  scale_x_log10(name = "Number of tips (extant and fossil)", breaks=c(2,round(2.5**(2:6)/5)*5)) +
+  scale_y_log10(name = "Normalized Mean\nSquared Error", lim=c(min(parameters$NMSE),100000)) + 
+  geom_smooth(method = "glm", formula = 'y ~ x', method.args = list(family = gaussian(link = "identity")), color = alpha("darkred", 0.7), fill = alpha("darkred", 0.7), se = T) +
+  facet_wrap(. ~ ParametersExpr, scales = "fixed", nrow=1, labeller=label_parsed) +
+  theme(panel.grid = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1, size=8),
+        axis.text.y = element_text(size=8),
+        axis.title  = element_text(size=12),
+        strip.text = element_text(size = 10),
+        legend.position = "none")
+p + ggtitle("Error in posterior estimates for increasing tree size")
+
+ggsave(paste0("Images/COBD_estimation_error_increasingTips", ifelse(rmtips>0, paste0("_rm", rmtips, "tip", ifelse(rmtips>1, "s", "")), ""), ".pdf"), p, width=9, height=9*0.23)
+```
+
+## Effect of occurrences
+
+```{r fig.width=12, fig.asp = .5, message=FALSE}
+min_ntips <- 0
+parameters_rmSmallTrees <- parameters[parameters$ntips>min_ntips,]
+
+# Categorize datasets based on the number of fossil occurrences
+fossil_nb_threshold <- quantile(parameters_rmSmallTrees$nfossils, 1/2)
+parameters_rmSmallTrees$fossil_category <- ifelse(
+  parameters_rmSmallTrees$nfossils >= fossil_nb_threshold, 
+  "Many fossils", 
+  "Few fossils"
+)
+
+# Plot estimation error vs. number of fossil tips
+p <- ggplot(parameters_rmSmallTrees, aes(x = nocc, y = NMSE, color = fossil_category, fill = fossil_category)) +
+  geom_point(alpha = 0.2, size = 2) +
+  #geom_smooth(method = MASS::rlm, se = T) +
+  geom_smooth(method = "glm", formula = 'y ~ x', se = T) +
+  #annotate("segment", x = 10, xend = max(parameters_rmSmallTrees$nocc), y = 0, yend = 0, colour = "gray30", alpha=0.7, linewidth=0.5, lty=2) +
+  scale_x_sqrt(name = "Number of fossil occurrences") +
+  #scale_x_log10(name = "Number of fossil occurrences") +
+  scale_y_log10(name = "Normalized Mean Squared Error") +
+  #coord_trans(y = scales::transform_exp(10)) +
+  #scale_y_continuous(trans=scales::log1p_trans()) +
+  #coord_trans(y = function()scales::new_transform("expm1", "expm1", "log1p")) +
+  scale_color_manual(
+    name = "Fossil category", 
+    values = c('Few fossils' = 'deepskyblue3', 'Many fossils' = 'orange3')
+  ) +
+  scale_fill_manual(
+    name = "Fossil category", 
+    values = c('Few fossils' = 'deepskyblue3', 'Many fossils' = 'orange3')
+  ) +
+  ggtitle("Effect of Adding More Fossil Occurrences on Parameter Estimation Error") +
+  facet_wrap(. ~ ParametersExpr, labeller = label_parsed, scales = "free", nrow = 2) +
+  theme(
+    panel.grid = element_blank(),
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 8),
+    axis.text.y = element_text(size = 8),
+        strip.text = element_text(size = 12),
+    legend.position = "bottom"
+  )
+p
+
+# Save the plot
+ggsave("Images/COBD_estimation_error_vs_fossil_occurrences.pdf", p, width = 12, height = 6)
+```
+
+```{r}
+glm.NMSE <- lapply(unique(parameters_rmSmallTrees$par), function(param){
+  glm(log(NMSE) ~ log(ntipsextant) + sqrt(nfossils)*sqrt(nocc), 
+      data = parameters_rmSmallTrees[parameters_rmSmallTrees$par == param,])
+  })
+names(glm.NMSE) <- unique(parameters_rmSmallTrees$par)
+lapply(glm.NMSE, summary)
+#lapply(glm.NMSE, plot)
+```
+
+```{r}
+# Initialize an empty list to store the summary tables for each parameter
+glm_summaries <- list()
+
+# Loop over each parameter in glm.NMSE
+for (param in names(glm.NMSE)) {
+  # Get the summary of the glm model
+  glm_summary <- summary(glm.NMSE[[param]])
+  
+  # Extract the coefficients table
+  coef_table <- as.data.frame(glm_summary$coefficients)
+  
+  coef_table$Parameter <- param
+  coef_table$Predictor <- rownames(coef_table)
+  coef_table <- coef_table[, c("Parameter", "Predictor", "Estimate", "Std. Error", "t value", "Pr(>|t|)")]
+  glm_summaries[[param]] <- coef_table
+}
+
+# Combine all tables into a single data frame
+glm_summary_table <- do.call(rbind, glm_summaries)
+rownames(glm_summary_table) <- NULL
+
+# View the summary table
+as.data.frame(lapply(glm_summary_table, function(x)if (is.numeric(x)){formatC(x, format = "g", digits = 2)}else{x}))
+```
+
+```{r fig.width=8, fig.asp = .6, message=FALSE}
+# Define the levels for Predictors and Parameters to ensure consistent ordering
+glm_summary_table$Predictor <- factor(glm_summary_table$Predictor, levels = unique(glm_summary_table$Predictor))
+glm_summary_table$Parameter <- factor(glm_summary_table$Parameter, levels = unique(glm_summary_table$Parameter))
+
+# Predict the mean influence of each predictor by multiplying the coefficients by the average value of the predictor in the dataset
+glm_summary_table$Mean_Predicted_Influence <- exp(glm_summary_table$Estimate*c(1, mean(log(parameters_rmSmallTrees$ntipsextant)), mean(sqrt(parameters_rmSmallTrees$nfossils)), mean(sqrt(parameters_rmSmallTrees$nocc)), mean(sqrt(parameters_rmSmallTrees$nfossils)*sqrt(parameters_rmSmallTrees$nocc))))
+
+glm_summary_table$ParametersExpr <- factor(glm_summary_table$Parameter, 
+                                           levels = names(parameter_labels),
+                                           labels = parameter_labels)
+
+# Define custom breaks and colors
+breaks <- c(log10(min(glm_summary_table$Mean_Predicted_Influence)),log10(1/3), -0.1, 0, 0.1, log10(3), log10(max(glm_summary_table$Mean_Predicted_Influence)))
+colors <- c("darkgreen", "darkolivegreen3", "olivedrab1", "white", "lightcoral", "red3", "darkred")
+
+p <- ggplot(glm_summary_table[glm_summary_table$Predictor != "(Intercept)",], aes(x = Predictor, y = ParametersExpr, fill = log10(Mean_Predicted_Influence), size = abs(log10(Mean_Predicted_Influence)), alpha = sapply(log10(`Pr(>|t|)`), function(x)max(x,-3)))) +
+  geom_point(shape = 21, color = "black") +
+  # Second layer: crosses for p-values > 0.05
+  geom_point(data = subset(glm_summary_table, Predictor != "(Intercept)" & `Pr(>|t|)` > 0.01),
+             shape = 4, alpha=0.4, stroke = 1) +
+  scale_fill_gradientn(
+    colors = colors,
+    values = scales::rescale(breaks),
+    name = "Average\nMultiplicative\nInfluence",
+    breaks = log10(c(1/20, 1/5, 1, 5, 20)), 
+    labels = c("1/20", "1/5", "1", "5", "20"),
+    limits = c(floor(min(breaks)*10), ceiling(max(breaks)*10))/10
+  ) +
+  scale_size_continuous(range = c(0, 10)) +
+  scale_alpha_continuous(
+    name = "P-value",
+    limits = c(-1, -3),
+    breaks = c(-1, -1, -2, -3), 
+    labels = c(expression("">0.01), expression(""<=0.1), expression(""<=0.01), expression(""<=0.001)),
+    trans = "reverse",
+    guide = guide_legend(
+      override.aes = list(size = c(5,5,5,5), shape = c(13,21,21,21), fill = "grey20")  # Custom points in the legend
+    )
+  ) +
+  theme_minimal(base_size = 12) +
+  scale_y_discrete(labels = scales::label_parse()) +
+  labs(x = "Predictors", y = "Model Parameters") +
+  theme(
+    legend.position = "right",
+    plot.title = element_text(size = 16, face = "bold"),
+    axis.title.x = element_text(size = 14, vjust = -1),
+    axis.title.y = element_text(size = 14, vjust = 3),
+    axis.text.x = element_text(size=12, angle = 0, hjust = 0.5),
+    axis.text.y = element_text(size=14)) +
+  guides(size = "none")
+
+p + ggtitle("Drivers of estimation error for COBD parameters")
+
+ggsave("Images/COBD_drivers_estimation_error.pdf", p, width = 8, height = 8*0.6)
+```
+
+```{r}
+# Create a data frame with predictors at average and baseline values
+baseline_dataset <- data.frame(
+  ntipsextant = mean(parameters$ntipsextant),
+  nfossils = 10,
+  nocc = 0
+)
+baseline_dataset_noFossil <- data.frame(
+  ntipsextant = mean(parameters$ntipsextant),
+  nfossils = 0,
+  nocc = 0
+)
+
+plot_predicted_error <- function(dataset, occurrence_range, title){
+  predicted_error <- sapply(glm.NMSE, predict, newdata = dataset, type = "response")
+  
+  predicted_error_over_baseline <- sapply(occurrence_range, function(nocc){
+    new_dataset <- dataset
+    new_dataset$nocc <- nocc
+  
+    # Predict expected value at baseline values
+    predicted_error_new <- sapply(glm.NMSE, predict, newdata = new_dataset, type = "response")
+    
+    return (exp(predicted_error_new - predicted_error))
+  })
+  
+  predicted_df <- as.data.frame(t(predicted_error_over_baseline))
+  predicted_df$nocc <- occurrence_range
+  predicted_long <- pivot_longer(predicted_df, cols = -nocc, names_to = "Parameter", values_to = "Predicted_Error_Ratio")
+  
+  # Plot the data
+  ggplot(predicted_long, aes(x = nocc, y = Predicted_Error_Ratio, color = Parameter)) +
+    geom_line() +
+    labs(
+      title = title,
+      x = "Number of Occurrences (nocc)",
+      y = "Predicted Error / Baseline Predicted Error"
+    ) +
+    ylim(0,2) +
+    theme_minimal()
+}
+
+occurrence_range <- 0:100
+plot_predicted_error(baseline_dataset_noFossil, occurrence_range, title ="Impact of including occurrences on the predicted estimation error (without fossils)")
+plot_predicted_error(baseline_dataset, occurrence_range, title = "Impact of including occurrences on the predicted estimation error (with 50 fossils)")
+```
+
+
+
+```{r}
+plot_predicted_error <- function(dataset, occurrence_range, title){
+  # Compute predicted error and standard error at baseline
+  predicted_error_list <- lapply(glm.NMSE, function(model){
+    predict(model, newdata = dataset, type = "link", se.fit=TRUE)
+  })
+  
+  # Initialize a list to store results
+  results_list <- list()
+  
+  for (n in seq_along(occurrence_range)) {
+    nocc <- occurrence_range[n]
+    new_dataset <- dataset
+    new_dataset$nocc <- nocc
+    
+    # Compute predicted error and standard error for new nocc
+    predicted_error_new_list <- lapply(glm.NMSE, function(model){
+      predict(model, newdata = new_dataset, type = "link", se.fit=TRUE)
+    })
+    
+    # Compute ratios and confidence intervals
+    results <- sapply(seq_along(glm.NMSE), function(i){
+      fit0 <- predicted_error_list[[i]]$fit
+      se0 <- predicted_error_list[[i]]$se.fit
+      
+      fit1 <- predicted_error_new_list[[i]]$fit
+      se1 <- predicted_error_new_list[[i]]$se.fit
+      
+      delta_fit <- fit1 - fit0
+      delta_se <- sqrt(se0^2 + se1^2)
+      
+      ratio <- exp(delta_fit)
+      lower_CI <- exp(delta_fit - 1.96 * delta_se)
+      upper_CI <- exp(delta_fit + 1.96 * delta_se)
+      
+      c(ratio=ratio, lower_CI=lower_CI, upper_CI=upper_CI)
+    })
+    
+    # Convert results to data frame and set column names
+    df <- data.frame(t(results))
+    colnames(df) <- c("ratio", "lower_CI", "upper_CI")
+    df$Parameter <- names(glm.NMSE)
+    df$nocc <- nocc
+    results_list[[n]] <- df
+  }
+  
+  # Combine all data frames
+  predicted_long <- do.call(rbind, results_list)
+  
+  # Plot the data with error bars
+  ggplot(predicted_long, aes(x = nocc, y = ratio, color = Parameter, fill = Parameter)) +
+    geom_line() +
+    geom_ribbon(aes(ymin = lower_CI, ymax = upper_CI), alpha = 0.2, color = NA) +
+    labs(
+      title = title,
+      x = "Number of Occurrences (nocc)",
+      y = "Predicted Error / Baseline Predicted Error"
+    ) +
+    #ylim(0,2) +
+    scale_y_log10() +
+    theme_minimal()
+}
+
+occurrence_range <- 0:100
+plot_predicted_error(baseline_dataset_noFossil, occurrence_range, title ="Impact of including occurrences on the predicted estimation error (without fossils)")
+plot_predicted_error(baseline_dataset, occurrence_range, title = "Impact of including occurrences on the predicted estimation error (with 50 fossils)")
+```
