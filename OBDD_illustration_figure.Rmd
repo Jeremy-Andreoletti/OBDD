@@ -136,7 +136,7 @@ p_rates <- ggplot(combined_rates, aes(
 # Plot sampling rates over time
 p_sampling <- ggplot(sampling_rates_melt, aes(x = time, y = value, color = variable)) +
   geom_step(linewidth = 2, direction = "vh", lineend = "round") +
-  scale_color_manual(values = c("orange3", "orange4"), labels = c("Occurrences", "Phylogenetic\nFossils")) +
+  scale_color_manual(values = c("orange3", "orange4"), labels = c("Occurrences", "Coded Fossils")) +
   labs(x = "Time", y = "Sampling Rates", color = "") +
   scale_y_log10() +
   scale_x_reverse() +
@@ -313,7 +313,7 @@ p_sampling <- ggplot(sampling_rates_melt, aes(x = time, y = value, color = varia
   scale_color_manual(
     values = c(occurrence_sampling_rate = "orange3",
                fossil_sampling_rate     = "orange4"),
-    labels = c("Occurrences", "\nPhylogenetic\nFossils\n")  # << forces extra gap
+    labels = c("Occurrences", "\nCoded Fossils\n")  # << forces extra gap
   ) +
   scale_y_log10() +
   scale_x_reverse(limits = x_limits, breaks = x_breaks, labels = x_labels) +
@@ -434,7 +434,6 @@ title_right <- ggdraw() + draw_label("Simulation outcomes", fontface = "bold", s
 titles <- plot_grid(title_left, spacer, title_right, ncol = 3, rel_widths = c(1, 0.08, 1))
 
 final_plot <- plot_grid(titles, final_3x3, ncol = 1, rel_heights = c(0.08, 1))
-ggsave("Images/Figure_1_OBDD_process.pdf", final_plot, width = 12, height = 9)
 final_plot
 ```
 
@@ -471,6 +470,7 @@ titles <- plot_grid(title_left, spacer, title_right, ncol = 3, rel_widths = c(1,
 final_plot <- plot_grid(titles, final_3x3, ncol = 1, rel_heights = c(0.08, 1))
 
 # ---- output ----
+ggsave("Images/Figure_1_OBDD_process.pdf", final_plot, width = 12, height = 9)
 final_plot
 ```
 

@@ -79,7 +79,7 @@ for (model_name, files) in model_groups
         @show length(out_trees_seed0)
         λmax = ceil(maximum(b.(out_trees_seed0))[1]*2)
         anim_tree = @animate for tree_i in out_trees_seed0
-          plot(tree_i, b, shownodes=(false, false, false), clim=(0,λmax))
+          plot(tree_i, b, shownodes=(false, false, false), clims=(0,λmax), right_margin = 10mm)
         end
         mp4(anim_tree, "Animations/$(ofile)_anim_tree_λ.mp4", fps=5)
 
@@ -92,14 +92,14 @@ for (model_name, files) in model_groups
 
         median_tree_seed0 = iquantile(remove_unsampled.(out_trees_seed0), 0.5)
         reorder!(median_tree_seed0)
-        plot(median_tree_seed0, b, shownodes=(false, false, false), xlab = "Time before present", 
-             tickfontsize = 13, guidefontsize = 17, left_margin = 2mm, bottom_margin = 3mm, top_margin = 3mm, size=(500,500))
+        plot(median_tree_seed0, b, shownodes=(false, false, false), clims=(0,1), xlab = "Time before present",
+             tickfontsize = 13, guidefontsize = 17, left_margin = 2mm, bottom_margin = 3mm, top_margin = 3mm, right_margin = 10mm, size=(500,500))
         savefig("Images/$(ofile)_seed0_tree_λ.pdf")
-        plot(median_tree_seed0, d, shownodes=(false, false, false), xlab = "Time before present", 
-             tickfontsize = 13, guidefontsize = 17, left_margin = 2mm, bottom_margin = 3mm, top_margin = 3mm, size=(500,500))
+        plot(median_tree_seed0, d, shownodes=(false, false, false), clims=(0,1), xlab = "Time before present",
+             tickfontsize = 13, guidefontsize = 17, left_margin = 2mm, bottom_margin = 3mm, top_margin = 3mm, right_margin = 10mm, size=(500,500))
         savefig("Images/$(ofile)_seed0_tree_μ.pdf")
-        plot(median_tree_seed0, nd, shownodes=(false, false, false), xlab = "Time before present", 
-             tickfontsize = 13, guidefontsize = 17, left_margin = 2mm, bottom_margin = 3mm, top_margin = 3mm, size=(500,500))
+        plot(median_tree_seed0, nd, shownodes=(false, false, false), clims=(-1,1), xlab = "Time before present",
+             tickfontsize = 13, guidefontsize = 17, left_margin = 2mm, bottom_margin = 3mm, top_margin = 3mm, right_margin = 10mm, size=(500,500))
         savefig("Images/$(ofile)_seed0_tree_nd.pdf")
 
         out_trees = reduce(vcat, out_trees)

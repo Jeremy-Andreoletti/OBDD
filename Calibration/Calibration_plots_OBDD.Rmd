@@ -21,12 +21,21 @@ knitr::opts_chunk$set(echo = FALSE)
 ```{r echo=FALSE}
 library(ape)
 library(phytools)
+library(TreeTools)
 library(FossilSim)
 library(dplyr)
 library(tidyr)
 library(tibble)
 library(ggplot2)
 library(convenience)
+```
+
+```{r}
+# Choose data root: uncomment the appropriate line
+# data_root <- "/Volumes/data/INSANE_OBD/Calibration"
+data_root <- "/Users/Jeremy/bioclust/INSANE_OBD/Calibration"
+
+datasets_dir <- "datasets_calibration"
 ```
 
 # Single dataset
@@ -36,9 +45,8 @@ MCMC trace
 
 ```{r}
 dataset_nb <- 3
-#readLines(paste0("datasets_calibration_OBDD/dataset", dataset_nb, "/tree_full.tre"))
-tree_full <- read.newick(paste0("/Volumes/data/INSANE_OBD/Calibration/datasets_calibration_OBDD/dataset", dataset_nb, "/tree_full.tre"))
-tree_reconstructed <- read.newick(paste0("/Volumes/data/INSANE_OBD/Calibration/datasets_calibration_OBDD/dataset", dataset_nb, "/tree_reconstructed.tre"))
+tree_full <- read.newick(paste0(data_root, "/", datasets_dir, "/dataset", dataset_nb, "/tree_full.tre"))
+tree_reconstructed <- read.newick(paste0(data_root, "/", datasets_dir, "/dataset", dataset_nb, "/tree_reconstructed.tre"))
 
 plotTree(tree_full)
 if (!is.null(tree_full$node.label)){
@@ -52,7 +60,7 @@ if (!is.null(tree_reconstructed$node.label)){
 
 
 ```{r}
-trace_file <- paste0("/Volumes/data/INSANE_OBD/Calibration/outputs/OBDD_SimulatedOBDD_dataset", dataset_nb, "_2000000iter.log")
+trace_file <- paste0(data_root, "/outputs/OBDD_SimulatedOBDD_dataset", dataset_nb, "_2000000iter.log")
 
 trace <- read.table(trace_file, header=T)
 names(trace) <- sub("lambda","λ",sub("mu","μ",sub("psi_","ψ",sub("omega_","ω",sub("sigma_","σ",sub("_root","",sub("alpha_","α",names(trace))))))))
@@ -64,7 +72,7 @@ head(trace)
 True values used in the simulations
 
 ```{r}
-params_file <- paste("/Volumes/data/INSANE_OBD/Calibration/datasets_calibration_OBDD/dataset", dataset_nb, "/params.csv", sep="")
+params_file <- paste0(data_root, "/", datasets_dir, "/dataset", dataset_nb, "/params.csv")
 params <- read.table(params_file, header=T) %>% gather(par, value)
 params <- params[1:10,]
 params
@@ -128,8 +136,7 @@ params
 # This line extracts dataset numbers from the filenames of log files in the "outputs" folder.
 # The gsub function is used to remove the "COBD_SimulatedCOBD_dataset" and "_1000000iter.log" parts from the filenames.
 # The list.files function lists all files in the "outputs" folder that match the pattern ".*1000000iter.log".
-#dataset_nbs <- as.integer(gsub("OBDD_SimulatedOBDD_dataset|_2000000iter.log", "", list.files("outputs/OBDD", pattern="OBDD_SimulatedOBDD.*2000000iter.log")))
-dataset_nbs <- as.integer(gsub("OBDD_SimulatedOBDD_dataset|_2000000iter.log", "", list.files("/Volumes/data/INSANE_OBD/Calibration/outputs", pattern="OBDD_SimulatedOBDD_dataset.*2000000iter.log")))
+dataset_nbs <- as.integer(gsub("OBDD_SimulatedOBDD_dataset|_2000000iter.log", "", list.files(paste0(data_root, "/outputs"), pattern="OBDD_SimulatedOBDD_dataset.*2000000iter.log")))
 
 # These variables define the parameters for the analysis. They are set to their default values.
 burnin_p <- 0              # Remove a given initial percentage of the MCMC trees
@@ -143,8 +150,7 @@ parameters_OBDD <- c()            # Create an empty data frame to store the resu
 for (dataset_nb in dataset_nbs) {
 
   # MCMC trace - Construct the path of the current log file based on the dataset number
-  #trace_file <- paste0("outputs/OBDD/OBDD_SimulatedOBDD_dataset", dataset_nb, "_2000000iter.log")
-  trace_file <- paste0("/Volumes/data/INSANE_OBD/Calibration/outputs/OBDD_SimulatedOBDD_dataset", dataset_nb, "_2000000iter.log")
+  trace_file <- paste0(data_root, "/outputs/OBDD_SimulatedOBDD_dataset", dataset_nb, "_2000000iter.log")
 
   # Read the MCMC trace from the log file, skipping rows based on the subsampling interval
   trace <- read.table(trace_file, header=T)[c(T,rep(F, subsampling_interval-1)),]
@@ -153,14 +159,14 @@ for (dataset_nb in dataset_nbs) {
   names(trace) <- sub("lambda","λ",sub("mu","μ",sub("psi_","ψ",sub("omega_","ω",sub("sigma_","σ",sub("_root","",sub("alpha_","α",names(trace))))))))
   
   # Read the reconstructed tree from a Newick file based on the dataset number
-  tree_reconstructed <- read.newick(paste0("datasets_calibration_OBDD/dataset", dataset_nb, "/tree_reconstructed.tre"))
+  tree_reconstructed <- read.newick(paste0(data_root, "/", datasets_dir, "/dataset", dataset_nb, "/tree_reconstructed.tre"))
   
   # Get the total number of tips and extant tips in the tree
   ntips <- Ntip(tree_reconstructed)
   ntipsextant <- length(getExtant(tree_reconstructed))
   nfossils <- sum(grepl("f", c(tree_reconstructed$tip.label, tree_reconstructed$node.label)))
   
-  occurrences <- read.csv(paste0("datasets_calibration_OBDD/dataset", dataset_nb, "/occurrences.csv"), header = F)
+  occurrences <- read.csv(paste0(data_root, "/", datasets_dir, "/dataset", dataset_nb, "/occurrences.csv"), header = F)
   nocc <- nrow(occurrences)
   
   # Check if the number of tips in the tree is greater than the threshold for removing small trees
@@ -173,7 +179,7 @@ for (dataset_nb in dataset_nbs) {
     # Read the true parameter values used in the simulations from a CSV file based on the dataset number
     # Convert the resulting data frame to a long format using the gather function from the dplyr package
     # Select the first 9 rows of the resulting data frame
-    params_file <- paste("datasets_calibration_OBDD/dataset", dataset_nb, "/params.csv", sep="")
+    params_file <- paste0(data_root, "/", datasets_dir, "/dataset", dataset_nb, "/params.csv")
     params_OBDD <- read.table(params_file, header=T) %>% gather(par, value)
     params_OBDD <- params_OBDD[1:10,]
     
@@ -367,6 +373,8 @@ p <- ggplot(parameters_OBDD[!grepl("α", parameters_OBDD$par),], aes(x=ntips, y=
 p
 ```
 
+## Normalized mean squared error
+
 ```{r fig.width=12, fig.asp = .4, message=FALSE}
 p <- ggplot(parameters_OBDD, aes(x=ntips, y=NMSE)) +
   #annotate("segment", x = 2, xend = max(parameters_OBDD$ntips), y = 0.01, yend = 0.01, colour = "gray30", alpha=0.7, linewidth=1) +
@@ -384,6 +392,32 @@ p <- ggplot(parameters_OBDD, aes(x=ntips, y=NMSE)) +
 p + ggtitle("Error in posterior estimates for increasing tree size")
 
 ggsave(paste0("Images/OBDD_estimation_error_increasingTips", ifelse(rmtips>0, paste0("_rm", rmtips, "tip", ifelse(rmtips>1, "s", "")), ""), ".pdf"), p, width=9, height=9*0.4)
+```
+
+## Absolute estimation error
+
+This reveals estimation bias (systematic over- or underestimation) that NMSE hides by squaring.
+
+```{r fig.width=12, fig.asp = .5, message=FALSE}
+parameters_OBDD$abs_error <- parameters_OBDD$median_aPosteriori - parameters_OBDD$true_value
+
+p_abs_ntips <- ggplot(parameters_OBDD, aes(x=ntips, y=abs_error)) +
+  geom_hline(yintercept = 0, colour = "gray30", alpha=0.7, linewidth=0.5) +
+  geom_point(alpha=0.12, size=1, colour = 'steelblue4') +
+  geom_smooth(method = "loess", formula = 'y ~ x', color = alpha("steelblue4", 0.8),
+              fill = alpha("steelblue4", 0.3), se = TRUE, linewidth=0.6) +
+  scale_x_log10(name = "Number of tips (extant and fossil)", breaks=c(2,round(2.5**(2:6)/5)*5)) +
+  scale_y_continuous(name = "Absolute error\n(Median − True)") +
+  facet_wrap(. ~ ParametersExpr, scales = "free", nrow=2, labeller=label_parsed, dir="v") +
+  theme(panel.grid = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1, size=8),
+        axis.text.y = element_text(size=8),
+        axis.title  = element_text(size=12),
+        strip.text = element_text(size = 10),
+        legend.position = "none")
+p_abs_ntips + ggtitle("Absolute estimation error for increasing tree size")
+
+ggsave(paste0("Images/OBDD_absolute_error_vs_ntips.pdf"), p_abs_ntips, width=9, height=9*0.4)
 ```
 
 ## Effect of occurrences
@@ -679,8 +713,8 @@ calculate_duration <- function(log_file) {
   return(as.numeric(duration))
 }
 
-durations <- c(sapply(0:99, function(dataset_nb)calculate_duration(paste0("/Volumes/data/INSANE_OBD/Calibration/Logs/OBDD.13112.", dataset_nb, ".log"))),
-               sapply(0:399, function(dataset_nb)calculate_duration(paste0("/Volumes/data/INSANE_OBD/Calibration/Logs/OBDD.13118.", dataset_nb, ".log"))))
+durations <- c(sapply(0:99, function(dataset_nb)calculate_duration(paste0(data_root, "/Logs/OBDD.13112.", dataset_nb, ".log"))),
+               sapply(0:399, function(dataset_nb)calculate_duration(paste0(data_root, "/Logs/OBDD.13118.", dataset_nb, ".log"))))
 parameters_OBDD$running_time <- durations[parameters_OBDD$dataset_nb]
 ```
 
@@ -745,7 +779,7 @@ plot(gamlss_model)
 # Effective sample sizes
 
 ```{r fig.width=10, fig.asp = .4}
-outfiles <- list.files("/Volumes/data/INSANE_OBD/Calibration/outputs", pattern = "OBDD_SimulatedOBDD_dataset.*2000000iter.log", full.names=T)
+outfiles <- list.files(paste0(data_root, "/outputs"), pattern = "OBDD_SimulatedOBDD_dataset.*2000000iter.log", full.names=T)
 
 runs <- lapply(outfiles, function(path){
   output <- list(trees = NA, ptable = read.table(path, header=T), gens.per.tree = 400)
@@ -754,7 +788,7 @@ runs <- lapply(outfiles, function(path){
   })
 
 runs_ESS <- essContParam(runs, namesToExclude="iteration", tracer=T)
-names(runs_ESS) <- paste0("ESS_dataset", sub("_2000000iter.log", "", sub("/Volumes/data/INSANE_OBD/Calibration/outputs/OBDD_SimulatedOBDD_dataset", "", outfiles)))
+names(runs_ESS) <- paste0("ESS_dataset", sub("_2000000iter.log", "", sub(paste0(data_root, "/outputs/OBDD_SimulatedOBDD_dataset"), "", outfiles)))
 
 df <- rownames_to_column(data.frame(t(runs_ESS)), var = "Dataset")
 df_long <- pivot_longer(df, cols = -Dataset, names_to = "Parameter", values_to="ESS")

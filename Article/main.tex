@@ -1,0 +1,720 @@
+% \documentclass{article}
+\documentclass[oupdraft]{sysbio}
+
+% \usepackage{arxiv}
+
+\usepackage[utf8]{inputenc}     % allow utf-8 input
+\usepackage[T1]{fontenc}        % use 8-bit T1 fonts
+\usepackage{setspace}           % double spacing
+\usepackage{hyperref}           % hyperlinks
+%\usepackage{xurl}               % simple URL typesetting
+\usepackage{booktabs}           % professional-quality tables
+\usepackage{amsfonts}           % blackboard math symbols
+\usepackage{nicefrac}           % compact symbols for 1/2, etc.
+\usepackage{microtype}          % microtypography
+\usepackage[section]{placeins}  % FloatBarrier
+\usepackage{lipsum}
+\usepackage{amsmath}
+\usepackage{stmaryrd}           % double brackets
+\usepackage{graphicx}
+\graphicspath{{Images/}}
+\usepackage{caption}            % subfigures
+\usepackage{subcaption}
+\usepackage{dirtytalk}
+\usepackage[title]{appendix}
+
+\captionsetup[subfigure]{justification=justified, singlelinecheck=false}
+
+\usepackage{cleveref}           % Referencing ranges of subfigures
+\crefrangelabelformat{subfigure}{#3#1#4--#5\crefstripprefix{#1}{#2}#6}
+\crefname{subfigure}{}{} % Remove the "figs." prefix for subfigures
+
+% Arrows
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+
+%\linespread{1.2}
+\usepackage{mathpazo} % Uses Palatino font, as in the thesis
+% \doublespacing
+\onehalfspacing
+\raggedbottom
+
+\DeclareUnicodeCharacter{2061}{}
+
+% Bibliography
+\usepackage{natbib}
+\bibliographystyle{apalike}
+
+\def \hat{\widehat}
+\def \tilde{\widetilde}
+\def \bar{\overline}
+\DeclareMathOperator{\Gammadist}{Gamma}
+\DeclareMathOperator{\Normal}{Normal}
+
+\newcommand{\revised}[1]{{\color{black} #1}}
+
+\begin{document}
+
+\title{\textbf{The Occurrence Birth-Death Diffusion Process: Unraveling Diversification Histories with Fossils and Heterogeneous Rates}}
+
+% \author{
+%   Jérémy Andréoletti \\
+%   (Corresponding author)\\
+%   Institut de Biologie - École Normale Supérieure\\
+%   Université PSL, CNRS, INSERM\\
+%   \textit{jeremy.andreoletti@gmail.com}\\
+%   39 avenue François-Vincent Raspail, 94110 Arcueil, France\\
+%   +33651518253
+%   \AND
+%   Ignacio Quintero \\
+%   Institut de Biologie - École Normale Supérieure\\
+%   Université PSL, CNRS, INSERM
+%   \AND
+%   Hélène Morlon \\
+%   Institut de Biologie - École Normale Supérieure\\
+%   Université PSL, CNRS, INSERM
+% }
+
+\author{Jérémy Andréoletti$^{1,\ast}$, Ignacio Quintero$^{1}$, and
+Hélène Morlon,$^{1}$\\[4pt]
+% Author addresses
+\textit{$^{1}$~Institut de Biologie, École Normale Supérieure, Université PSL, CNRS, INSERM, 75005 Paris, France}
+\\[2pt]
+% E-mail address for correspondence
+\textit{*Corresponding author: \textit{jeremy.andreoletti@gmail.com}, 39 avenue François-Vincent Raspail, 94110 Arcueil, France, +33651518253}}
+
+% \begin{document}
+
+% Running headers of paper:
+\markboth%
+{Andréoletti, Quintero, Morlon}
+{The Occurrence Birth-Death Diffusion Process}
+
+\maketitle
+
+\begin{abstract}{
+    Phylogenetic diversification analyses often overlook the wealth of information contained in fossils that cannot be directly integrated into phylogenetic trees (called fossil occurrences), as well as fine-grained variations in speciation and extinction rates across lineages.
+    Addressing both of these shortcomings, we develop the Occurrence Birth-Death Diffusion (OBDD) process. This process incorporates the sampling of fossil occurrences by extending the recently developed Fossilized Birth-Death Diffusion (FBDD) process, thereby taking advantage of a clade's entire fossil record to infer its evolutionary history. To mitigate the computational challenges associated with the OBDD process, we employ Bayesian data augmentation methods. We illustrate our approach with an empirical analysis of cetacean diversification. Our analyses show that the integration of fossils is essential to recover diversification rates and richness trajectories. More specifically, fossils included in the phylogeny are highly informative about past diversification dynamics, while fossil occurrences can help to refine estimates, but do not provide significant additional information when the phylogeny already contains many fossils. We make the OBDD available in the Julia package Tapestree.
+}{Occurrence Birth-Death Diffusion, Diversification, Phylogenies, Fossils, Rate Heterogeneity, Cetaceans}
+\end{abstract}
+\newline
+
+\section{Introduction}
+
+The study of diversification histories sheds light on the patterns and processes that drive the emergence, extinction, and evolution of species. Initiated by extensive paleontological research on the fossil record, the field has seen significant advancement with the introduction and refinement of phylogenetic diversification models. These models represent diversification as a birth-death (BD) process, where each lineage can give birth or go extinct at given rates (commonly denoted as $\lambda$ for speciation and $\mu$ for extinction) \citep{nee_reconstructed_1994, stadler_incomplete_2009, stadler_sampling-through-time_2010}. Early iterations of these models were developed for phylogenies of extant-only taxa and assumed constant rates over time and across lineages, but they have progressively incorporated more complexity, e.g. allowing for temporal and among-lineage variation in rates and dependencies on traits or environmental factors \citep{stadler_recovering_2013, morlon_phylogenetic_2014, morlon_phylogenetic_2024}.
+
+Recently, substantial progress has been made in integrating direct fossil evidence into phylogenetic diversification analyses by adding sampling processes to the birth-death process, thus leveraging the extensive information contained in paleontological databases. This resulted in the development of the Fossilized Birth-Death (FBD) model, which integrates into a phylogeny the fossils whose morphological or taxonomic information enables their phylogenetic placement \citep{stadler_sampling-through-time_2010, heath_fossilized_2014}. However, this information is not available for most fossils, leading traditional FBD models to ignore a large portion of the fossil record. In fact, due to the effort required to compile these data, researchers often include only one fossil per morphospecies in matrices of morphological characters \citep{wright_integrating_2022}. In response, the Occurrence Birth-Death (OBD) model was developed to include fossil occurrences, that is, the remaining fossils that lack the publicly compiled morphological or taxonomic information that would allow them to be placed in a phylogeny \citep{vaughan_estimating_2019, gupta_probability_2020, andreoletti_occurrence_2022}. From now on, we will use \say{fossil} or \say{phylogenetic fossil} to designate those in the tree and \say{occurrence} or \say{fossil occurrence} for those that are not. Although fossil occurrences are not as informative as phylogenetic fossils, variation in their number over time can reflect variation in a clade's total species richness and inform the underlying speciation and extinction rates. This is analogous to the complementary information provided by genome sequences (analogous to fossil characters) and incidence data (analogous to occurrences) to understand pathogen dynamics, and, in fact, the same phylodynamic tools are used in this context \citep{macpherson_unifying_2022, stadler_decoding_2024}. Analyses of the OBD model in the context of pathogen phylodynamics have shown that sampling times (incidence data) often play a key role in driving inference when sequence diversity is low; in contrast, in scenarios of rapid evolution, sequence data provide the dominant source of information \citep{featherstone_decoding_2023}. This suggests that occurrences will be particularly useful when the placement of fossils in the phylogeny is uncertain, for example due to few or similar morphological characters. The OBD model was first implemented by \citet{vaughan_estimating_2019} in the phylogenetic software BEAST2 \citep{bouckaert_beast_2019} with a particle filter algorithm. Next, \citet{gupta_probability_2020} developed a faster algorithm; \citet{andreoletti_occurrence_2022} extended the model to account for the piecewise constant rate variation and implemented it in RevBayes \citep{hohna_revbayes_2016}. Both implementations allow full joint inference of phylogenetic trees and diversification (or epidemiological) parameters. However, their application to large trees is hampered by computational limitations, primarily due to a numerically intensive integration step required for the likelihood computation. A fast approximation of this model using a method called TimTam \citep{zarebski_estimating_2025} has been implemented in Beast2 but is currently limited to a scenario with lineage removal at sampling, which makes sense in the case of sampling pathogen genomes, but is not realistic in the case of sampling fossils. In addition, all current implementations of the OBD model assume homogeneous diversification rates across lineages.
+
+Substantial progress has also been made in developing diversification models that accommodate rate heterogeneity, in which rates can differ between portions of the tree, either due to rare clade-wide shifts \citep{rabosky_automatic_2014, mitchell_inferring_2019, maddison_estimating_2007, caetano_hidden_2018}, or more gradual branch-specific changes \citep{maliet_model_2019, quintero_imbalanced_2024}. In particular, \citet{quintero_imbalanced_2024} recently developed the Birth-Death Diffusion (BDD) process, in which diversification rates diffuse along branches according to a geometric Brownian motion process. The BDD model does not integrate a fossil sampling process, which prevents reliably inferring heterogeneous extinction rates. However, it can incorporate information from the fossil record by constraining extinction trajectories independently inferred for the clade (or subclades) from fossil data. The model has now been extended into the Fossilized Birth-Diffusion (FBDD) process \citep{quintero_rise_2025}, which accommodates fossils placed in the phylogeny. Both the BDD and FBDD models have been implemented in the Julia package Tapestree \citep{quintero_tapestreejl_2020}, with an inference technique called Bayesian data augmentation (see \nameref{Methods} and \citet{tanner_calculation_1987, maliet_fast_2022}). Diversification analyses in Tapestree operate on fixed phylogenies, but Bayesian data augmentation has also been used for full inference of phylogeny and diversification processes \citep{barido-sottani_clads_2023, chabrol_fossilized_2025}. Data augmentation circumvents some mathematical and computational challenges of computing likelihoods of incomplete observed data; it also produces posterior samples of the full diversification histories, i.e. complete phylogenies including unsampled lineages and, in the case of diffusion models, heterogeneous diversification rates evolving along all (observed and unobserved) branches. From this posterior sample of complete phylogenies, one can directly obtain the distribution of estimated diversity-through-time trajectories for a clade, as well as study in detail the patterns of speciation and extinction at the lineage level.
+For example, using the BDD model, \citet{quintero_imbalanced_2024} observed an imbalanced speciation process in mammals wherein most lineages undergo a progressive decline in speciation rates before going extinct - notably at the K-Pg mass extinction event - while a few lineages preserve a high speciation potential and drive the diversification of their clade. The selective extinction of lineages with low speciation rates could only be captured by taking into account the rates of the unobserved lineages. Similarly, using the FBDD model, \citet{quintero_rise_2025} studied diversity trajectories across 27 radiations and used data-augmented histories to show that diversity expansions are fueled by bursts of rapid speciation, while slowdowns and declines are primarily governed by extinction rates. The current implementation of FBDD aims to correct for a mismatch between the FBD process, which assumes a Poisson sampling of fossils, and paleontological databases, in which morphospecies are often only represented by a single described specimen \citep{wright_integrating_2022}. To this end, taxonomical information can be used in the FBDD inference to add fossil occurrences corresponding to the morphospecies included in the phylogeny. Although this reduces the mismatch mentioned above, the model does not incorporate a specific sampling process for occurrences and ignores occurrences that do not belong to included morphospecies.
+
+Building on these recent developments, we introduce the Occurrence Birth-Death Diffusion (OBDD) model, and implement it in Tapestree, together with its simpler homogeneous variant, the Occurrence Birth-Death (OBD) model. These models combine the strengths of their predecessors while tackling both the computational limitations of the previous OBD implementations and the need to accommodate rate heterogeneity across lineages. They extend the analytical framework by accurately incorporating a broader range of fossil records, including those without described and recorded morphological characters or reliable taxonomic information at the subclade level, which are often very numerous. These developments allow us to tackle an important interrogation, namely assessing the relative contribution of phylogenies, various types of fossils, and rate heterogeneity to accurately reconstructing diversification histories. After developing and validating the OBD and OBDD models, we explore this question by applying a range of diversification models, accounting or not for different fossil data types and rate heterogeneity, to a cetacean dataset.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=\linewidth]{Images/Figure_1_OBDD_process.pdf}
+    \caption{\textbf{The Occurrence Birth-Death Diffusion process.} This figure illustrates a simulation under the OBDD process. One key feature is that speciation and extinction rates are not specified in advance, except for starting values (resp. $\lambda_0$ and $\mu_0$), but instead change gradually along each new branch of the phylogeny. The other important feature is that the sampling process produces fossil occurrences that are not placed in the phylogeny, in addition to the standard phylogenetic fossils. Consequently, each simulated dataset will result in both a sample of rate trajectories (right column, middle) and a phylogeny with fossils and a record of occurrences (right column, resp. brown diamonds and orange circles).}
+    \label{fig:obdd-illustration}
+\end{figure}
+
+\section{Materials \& Methods}\label{Methods}
+\subsection{The Occurrence Birth-Death Diffusion process}\label{OBDD}
+
+We introduce the Occurrence Birth-Death Diffusion (OBDD) model, which combines a total-evidence approach of the fossil record with the flexibility of a branch-specific heterogeneous birth-death model (Fig.~\ref{fig:obdd-illustration}). To model heterogeneity in diversification rates across the phylogeny, speciation and extinction rates are assumed to evolve according to a geometric Brownian motion (\say{GBM}), following \citet{quintero_imbalanced_2024}. That is, the logarithms of speciation and extinction rates follow a Brownian motion (see Fig.~\ref{fig:obdd-illustration}) with variance parameters $\sigma_{\lambda}^2$ and $\sigma_{\mu}^2$, respectively. Furthermore, trend parameters $\alpha_{\lambda}$ and $\alpha_{\mu}$ detect consistent rate increases or decreases over time. Specifically, the GBM processes start with initial values $\lambda_0$ and $\mu_0$, respectively, and follow:
+
+\begin{equation}
+    \begin{cases}
+        d\ln(\lambda_l(t)) = \alpha_{\lambda}dt + \sigma_{\lambda}W(t)\\
+        d\ln(\mu_l(t)) = \alpha_{\mu}dt + \sigma_{\mu}W(t),
+    \end{cases}
+\end{equation}
+
+with $\lambda_l(t), \mu_l(t)$ being the branch-specific rates for lineage $l$ at time $t$, and $W(t)$ the Wiener process (i.e., standard Brownian motion).
+
+Fossils are incorporated into the phylogeny with a fossil sampling rate ($\psi$) following a Poisson point process along branches of the tree \citep{stadler_sampling-through-time_2010, heath_fossilized_2014}. The integration of fossil occurrences employs a similar approach, with an independent rate of occurrence sampling denoted by $\omega$ \citep{vaughan_estimating_2019}. The difference is that these occurrences are not included in the phylogeny but are instead only recorded as sampling times (as shown in Fig.~\ref{fig:obdd-illustration}). Given that fossilization and fossil recovery rates are expected to vary over geological time \citep{dominici_awkward_2020}, we allow these sampling rates to vary in a piecewise manner at user-defined times (Fig.~\ref{fig:obdd-illustration}).
+
+\subsection{Parameter inference with Bayesian data-augmentation}
+
+We implement the OBDD model within the computational framework of the Julia package Tapestree \citep{bezanson_julia_2017, quintero_tapestreejl_2020}. Parameter inference uses a Bayesian data augmentation approach \citep{tanner_calculation_1987}, as described in prior studies on other phylogenetic diversification models \citep{maliet_fast_2022, barido-sottani_clads_2023} and on Birth-Death Diffusion processes in particular \citep{quintero_imbalanced_2024, quintero_rise_2025}. During a Markov Chain Monte Carlo (MCMC) procedure, the data augmentation algorithm involves alternately simulating missing parts of the phylogenetic tree, referred to as augmented branches, as well as all branch-specific diversification rates, and updating the model parameters based on this augmented data. Therefore, a complete phylogeny, combining the reconstructed tree and the augmented branches, with associated diversification rates, is available at each iteration of the MCMC, simplifying the likelihood computation for any set of model parameters (see the Appendix \ref{SM-likelihood}). Data augmentation thus circumvents the difficulty of computing the likelihood of complex models based on the reconstructed phylogeny, which otherwise requires the analytical integration of unobserved components of the process. Furthermore, this iterative process generates a \say{forest} of posterior augmented trees, with associated diversification rates, which can be used to reconstruct the posterior distribution of species richness, or evolutionary rates, over time.
+
+To model rate heterogeneity across the phylogeny, we discretise all branches at regular intervals, $\delta t$ and approximate the GBM described in Section \ref{OBDD}. Gibbs sampling is used for most parameters, leveraging conjugate priors to enhance the efficiency of the inference process, and a Metropolis-Hastings algorithm is used for augmenting unobserved branches \citep{quintero_imbalanced_2024, quintero_rise_2025}. The fossil sampling rate ($\psi$) is inferred similarly to the FBD and FBDD processes, using a conjugate Gamma prior updated based on the number of fossils and the total branch length of the complete augmented phylogenies, as in \citet{quintero_rise_2025}. In the following, we detail parts of the inference particular to the OBD and OBDD process, i.e., those involved in the integration of fossil occurrences (sampling rate $\omega$).
+
+The MCMC procedure explores the parameter space guided by the likelihood of observed data for current and proposed parameter values. Given that we introduced fossil occurrences, let us consider their likelihood according to our sampling process. On a single branch of length $L_i$ with a constant sampling rate $\omega$, the likelihood of observing a specific number of fossil occurrences $k_i$ follows a Poisson distribution $\mathcal P(\omega L_i)$. When $N_i$ lineages exist in parallel, the sum of all sampled occurrences also follows a Poisson process $\mathcal P(\omega L_i N_i)$. We apply this property across $I$ intervals delimited by changes in the diversity-through-time curve of the augmented tree: each interval $i$ has a constant number of lineages $N_i$ of identical length $L_i$ and contains $k_i$ occurrences. The likelihood of the whole occurrence dataset $\Omega$ given the complete augmented tree $\Psi$ and the occurrence sampling rate $\omega$ is thus the following:
+
+\begin{equation}\label{eq:ll_occ}
+    l(\Omega|\Psi, \omega) = \prod_{i=1}^I \frac{(\omega L_i N_i)^{k_i}e^{-\omega L_i N_i}}{k_i!}.
+\end{equation}
+
+Let us compute the likelihood ratio for a new proposal parameter value $\omega'$ relative to the current value $\omega$:
+
+\begin{align*}\label{eq:ll_ratio}
+\frac{l(\Omega|\Psi, \omega')}{l(\Omega|\Psi, \omega)} &= \prod_{i=1}^I \left(\frac{\omega'}{\omega}\right)^{k_i}e^{-(\omega'-\omega) L_i N_i}\\
+&= \left(\frac{\omega'}{\omega}\right)^{k}e^{-(\omega'-\omega) L}
+\end{align*}
+
+
+where $k = \sum_{i=1}^I k_i$ is the total number of occurrences and $L = \sum_{i=1}^I L_i N_i$ is the cumulative length of all observed and augmented lineages. Note that the exact timing of the occurrences does not affect the likelihood ratio; the process is equivalent to considering a single Poisson process $\mathcal P(\omega L)$ on the full augmented tree. With piecewise-constant sampling rates, the same reasoning applies within each time period. Thus, the posterior distribution of $\omega_p$ in a period $p$ can be efficiently sampled using a conjugate Gamma prior, $\Gamma(\gamma_1, \gamma_2)$, which is updated based on the observed fossil occurrences $k_p$ and sum of branch lengths $L_p$ during this period:
+\begin{equation*}
+p(\omega_p| \cdot) = \Gamma(\gamma_1 + k_p, \gamma_2 + L_p).
+\end{equation*}
+
+The data augmentation steps involve proposing modifications to the tree, that is, replacing some of the reconstructed branches by subtrees simulated under the process, and accepting or rejecting these proposals based on Hasting ratios. Here, the acceptance ratio used for the inference of the FBDD process \citep{quintero_rise_2025} is modified to account for the likelihood ratio of the occurrence data given the proposed and current augmented phylogenies. The likelihood of observing the fossil occurrences given an augmented tree depends only on the number of lineages over time, represented by the Diversity-Through-Time (DTT) trajectory. Modifying the augmented tree alters the DTT, which in turn affects the likelihood of the fossil occurrence data. Using the likelihood expression in Equation \ref{eq:ll_occ} over $J$ intervals delimited by changes in the current or proposed DTT, we derive the following likelihood ratio of the proposed tree $\Psi'$ compared to the current tree $\Psi$:
+
+\begin{align*}
+\frac{l(\Psi', \Omega | . )}{l(\Psi, \Omega | . )} = \frac{l(\Psi'|.)}{l(\Psi|.)}\frac{l(\Omega|\Psi', \omega)}{l(\Omega|\Psi, \omega)} 
+&= \frac{l(\Psi'|.)}{l(\Psi|.)} \times \prod_{j=1}^J \left( \frac{\omega L_j N_j^{\Psi'}}{\omega L_j N_j^{\Psi}} \right)^{k_j} e^{-\omega (L_j N_j^{\Psi'} - L_j N_j^{\Psi})}\\
+&= \frac{l(\Psi'|.)}{l(\Psi|.)} \times \prod_{j=1}^J \left( \frac{N_j^{\Psi'}}{N_j^{\Psi}} \right)^{k_j} \times e^{-\omega \sum_{j=1}^J L_j(N_j^{\Psi'} - N_j^{\Psi})}.
+\end{align*}
+
+The first part of this ratio is identical to the one used in the FBDD process (see the Appendix \ref{SM-likelihood}), while the added terms ensure that at each iteration the augmented trees reflect the observed fossil occurrence record. In other terms, the greater the number of occurrences included in a given period, the more likely it is that many augmented branches will be accepted in that interval, which will then influence the diversification rate estimates.
+
+The simpler OBD model with constant homogeneous speciation and extinction rates is also implemented in Tapestree.jl but as an independent model \citep{quintero_tapestreejl_2020}, extending the constant-rate FBD model \citep{quintero_rise_2025}. The integration of occurrences relies on the same functions for the Gibbs sampling and Metropolis-Hastings steps described above.
+
+\subsection{Simulation-based model validation}
+
+We validate both the OBD and OBDD models using a procedure called simulation-based calibration, which consists, for a given model, of:
+\begin{enumerate}
+    \item choosing prior distributions for the model parameters;
+    \item simulating many trees using parameter values drawn from these distributions (here, we simulated 1000 trees under the OBD model, and 500 under the OBDD model);
+    \item for each simulated tree, inferring posterior distributions for all parameters, starting from the prior distributions above;
+    \item counting the recovery proportion of the true parameter values in posterior credible intervals of increasing widths (from $5\%$ to $95\%$).
+\end{enumerate}
+If the recovery proportion matches the widths of all credible intervals, the model is considered well calibrated.
+
+For the OBD model, the initial speciation and extinction rates were drawn from a $\Gammadist(1.0, 1.0)$ distribution, with a time of origin set to 2.0 units. For the OBDD model, the initial speciation and extinction rates were drawn from $\Gammadist(1.5, 1.0)$ distributions, trend parameters $\alpha_{\lambda}$ and $\alpha_{\mu}$ from $\Normal(0.0 ,0.1)$ distributions, and diffusion parameters $\sigma_{\lambda}$ and $\sigma_{\mu}$ from $\text{InverseGamma}(5.0, 0.5)$ distributions. The time of origin was set to 1.0 units. These distributions were selected to produce phylogenies of moderate size for computational efficiency, while covering realistic parameter values \citep{quintero_rise_2025}. Fossil sampling rates $\psi$ and fossil occurrence rates $\omega$ were modelled with piecewise constant rates over two epochs, divided at half the time of origin, and are now denoted as $\psi_1, \psi_2, \omega_1, \omega_2$. They were drawn, respectively, from the following distributions: $\psi_1, \psi_2 \sim \Gammadist(1.0, 1.0)$ and $\omega_1, \omega_2 \sim \Gammadist(1.0, 2.0)$ distributions for OBD and $\psi_1, \psi_2 \sim \Gammadist(2.0, 1.0)$ and $\omega_1, \omega_2 \sim \Gammadist(2.0, 5.0)$ for OBDD, reproducing the expected higher number of fossil occurrences compared to phylogenetic fossils. MCMC inferences were run for 500.000 and 2.000.000 iterations, respectively. We recorded the total running time of each MCMC inference, in order to analyse how runtime scales with phylogeny size and the inclusion of fossils.
+
+\subsection{Case study: Cetacea}
+
+We used the Cetaceans as a case study to explore the effect on the inference of diversification histories of i) the inclusion of fossils, in the phylogeny or as simple occurrences, and ii) accounting for rate heterogeneity. We used the cetacean phylogeny from \citet{lloyd_total-group_2021}, which contains 89 extant species and 405 fossils (representing distinct morphotaxa). This phylogeny was reconstructed through a meta-analytic approach to combine previous datasets into a metatree that was then used to set constrains on a timetree inference under an FBD tree prior. More specifically, we used five phylogenies drawn from the set of posterior phylogenies provided in the paper (identified as the \say{Safe} posterior) as replicates for each analysis. In addition, we used the 966 fossil occurrences from the Paleobiology Database \citep{mcclennen_paleobiology_2024} used in \citet{andreoletti_occurrence_2022}, and we sampled their age uniformly in their age uncertainty range at the beginning of each replicate. Their temporal distributions over the five replicates are presented in the Appendix \ref{SM-OTT}.
+
+We fitted eight diversification models, all implemented in Tapestree.jl:
+\begin{itemize}
+    \item the constant-rate Birth-Death, Fossilized Birth-Death, Occurrence Birth-Death, and Occurrence Birth-Death without fossils models (BD, FBD, OBD, and OBD-noF);
+    \item the Birth-Death Diffusion, Fossilized Birth-Death Diffusion, Occurrence Birth-Death Diffusion, and Occurrence Birth-Death Diffusion without fossils models (BDD, FBDD, OBDD, and OBDD-noF).
+\end{itemize}
+
+For the BD and BDD models, we removed fossils from the phylogenies, as well as the stem branch, which is also a product of adding fossils. For the OBD and OBDD models, we added fossil occurrences. For the OBD-noF and OBDD-noF models, we removed fossils from the phylogeny but included occurrences to assess the relative contribution of fossils within and outside of the phylogeny. We kept the stem branch, as it can be inferred in empirical datasets using occurrences.
+For models including fossilization (i.e., all models except the BD and BDD models), we accounted for known differences in fossil availability across geological periods by considering piecewise constant temporal variations in fossilization rates ($\psi$ for phylogenetic fossils and $\omega$ for occurrences), enabling rate changes at the start and end of the Early Oligocene (Rupelian), Early Miocene (Aquitalian), and Late Miocene (Messinian) periods of well-established low preservation \citep{marx_cetacean_2016, dominici_awkward_2020}, as in \citet{andreoletti_occurrence_2022}. We thus inferred seven fossil sampling rates and seven occurrence sampling rates for the OBDD model.
+Table \ref{tab:models} details the data, the number of parameters, and the MCMC inference efficiency of each of these models on the cetacean dataset. Specific features of the diversification history of cetaceans (see \nameref{Discussion}) required us to run the model for a greater number of iterations and therefore longer than in Figure~\ref{fig:running-time} to ensure good convergence. MCMC runs that were still ongoing after 100 days were interrupted. Convergence was evaluated using Tracer \citep{rambaut_posterior_2018} and the R library \textit{coda} \citep{plummer_coda_2006}, with the average Effective Sample Sizes (ESS) reported in Table \ref{tab:models}. This evaluation focuses on parameter convergence rather than augmented tree convergence, as current phylogenetic methods for assessing phylogenetic convergence are limited to trees with known tips. Nevertheless, the two should be closely related in the data augmentation procedure.
+
+\begin{table}[!ht]
+    \centering
+    \caption{\textbf{Summary of the different diversification models and corresponding analyses on the cetacean dataset.} The table shows for each analysis the number of model parameters, characteristics of the cetacean data subset included in the inference - number of tips, fossils and fossil occurrences - and the computational efficiency. Models include homogeneous variants (BD, FBD, OBD, OBD-noF) and diffusion-based variants (BDD, FBDD, OBDD, OBDD-noF) ; the suffix -noF indicates models run without fossils in the phylogeny, retaining only fossil occurrences. MCMC durations are averaged over 5 replicates. Effective sample sizes (ESS) are averaged over replicates and parameters.}
+    \begin{tabular}{ccccccccc}
+         Model & BD & FBD & OBD & OBD-noF & BDD& FBDD& OBDD& OBDD-noF\\
+         ---\\
+         Parameters & 2 & 9 & 16 & 9 & 5 & 13 & 20 & 13\\
+         ---\\
+         Tips & 89 & 372 & 372 & 89 & 89 & 372 & 372 & 89\\
+         Fossils & 0 & 405 & 405 & 0 & 0 & 405 & 405 & 0\\
+         Occurrences & 0 & 0 & 966 & 966 & 0 & 0 & 966 & 966\\
+         ---\\
+         Burn-in & 50K & 100K & 100K & 100K & 50K & 50K & 50K& 50K\\
+         Iterations & 2M & 2M & 2M & 50M & 10M & 10M & 10M & 20M\\
+         Duration (days) & 0.01 & 0.07 & 0.85 & 2.9 & 7.7 & 100 & 100 & 80 \\
+         Average ESS & 1300 & 1800 & 1400 & 740 & 810 & 1900 & 1800 & 310 \\
+    \end{tabular}
+    \label{tab:models}
+\end{table}
+
+\FloatBarrier
+\section{Results}
+\subsection{Validating the OBD and OBDD implementations}
+
+Our simulation-based calibration analysis of the Occurrence Birth-Death (OBD) and Occurrence Birth-Death Diffusion (OBDD) models demonstrate a well-calibrated implementation for all parameters (Fig.~\ref{fig:cobd-validation} and \ref{fig:obdd-validation}). 
+For the OBD model, the recovery proportions of the true parameter values consistently match the credible interval widths (\ref{fig:cobd-calibration}) and the estimation errors decrease with increasing tree size (\ref{fig:cobd-relerror}). The OBDD model is similarly well calibrated for all parameters (Fig.~\ref{fig:obdd-calibration}), and the estimation errors for both speciation and extinction rates diminish as the tree size grows (Fig.~\ref{fig:obdd-relerror}). Overall, the validation confirms that both models perform reliably in recovering true diversification parameters from simulated data.
+
+\begin{figure}[!ht]
+    \centering
+    \begin{subfigure}{\linewidth}
+		\caption{Model calibration}
+        \includegraphics[width=\linewidth]{Images/COBD_truth_recovery_proportions.pdf}
+		\label{fig:cobd-calibration}
+    \end{subfigure}
+    \begin{subfigure}{1\linewidth}
+		\caption{Estimation error for increasing tree size}
+        \includegraphics[width=\linewidth]{Images/COBD_estimation_error_increasingTips.pdf}
+		\label{fig:cobd-relerror}
+    \end{subfigure}
+    \caption{\textbf{Simulation-based validation of the OBD model.}}
+    \label{fig:cobd-validation}
+\end{figure}
+
+\begin{figure}[!ht]
+    \centering
+    \begin{subfigure}{1\linewidth}
+		\caption{Model calibration}
+        \includegraphics[width=\linewidth]{Images/OBDD_truth_recovery_proportions.pdf}
+		\label{fig:obdd-calibration}
+    \end{subfigure}
+    \begin{subfigure}{\linewidth}
+		\caption{Estimation error for increasing tree size}
+        \includegraphics[width=\linewidth]{Images/OBDD_estimation_error_increasingTips.pdf}
+		\label{fig:obdd-relerror}
+    \end{subfigure}
+    \caption{\textbf{Simulation-based validation of the OBDD model.}}
+    \label{fig:obdd-validation}
+\end{figure}
+
+Regarding the influence of tree size on computation time, Figure~\ref{fig:running-time} shows that, for datasets generated under the OBDD model and for a fixed number of MCMC iterations, our inference should take an extra day for each additional 150 tips in the reconstructed phylogeny (including fossil tips). The Generalised Linear Model (GLM) and Generalised Additive Model (GAM) regressions (see Appendix \ref{SM-runtime}) revealed no influence of the number of fossils or occurrences on the runtime, which was not apparent in Figure~\ref{fig:running-time}, indicating that the code has been adequately optimised for extensive fossil integration.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.6\linewidth]{Images/OBDD_running_time_vs_ntips.pdf}
+    \caption{\textbf{Scaling of MCMC runtime with tree size for the OBDD model.} Each point corresponds to one of the datasets used for the simulation-based model validation procedure, from which we recorded the number of tips in the reconstructed phylogeny (including fossil tips) and the runtime for the set number of iterations. The colour gradient indicates the number of simulated occurrences.}
+    \label{fig:running-time}
+\end{figure}
+
+In Appendix \ref{SM-NMLE}, we further explore the drivers of estimation error for each parameter using the same simulated datasets. We observe that the error reduction for several parameters is mostly driven by their corresponding data: extant tree size for the initial speciation and extinction rate, number of fossils for the fossil sampling rates, and number of occurrences for the occurrence sampling rate. The drift and diffusion parameters are generally more difficult to infer (see Fig.~\ref{fig:obdd-relerror}), and no significant predictor influence was detected. The interaction between fossils ($\sqrt{\text{nfossils}}$) and occurrences ($\sqrt{\text{nocc}}$) also has an influence on the estimation error, which was positive for most parameters, although only significant for $\psi_2$ and $\omega_2$. The positive effect reflects that as the number of fossils included in the phylogeny increases, the information provided by additional occurrences decreases, and vice versa.
+
+\FloatBarrier
+\subsection{Assessing the role of fossils in estimating the diversification history of Cetaceans}
+
+Consistent with previous results on mammals \citep{quintero_imbalanced_2024}, we found that models without fossils infer overly simplistic species richness trajectories, close to the observed lineages through time (LTTs) of the reconstructed phylogenies (Fig.~\ref{fig:ltt-cbd} and \ref{fig:ltt-bdd}). These models fail to capture the rise and fall trajectory of cetacean diversity expected from paleontological records over the Cenozoic \citep{morlon_reconciling_2011, marx_baleen_2015, quintero_rise_2025}. In models that include only fossil occurrences but exclude phylogenetic fossils (OBD-noF, OBDD-noF, Fig.~\ref{fig:ltt-cobd-nof} and \ref{fig:ltt-obdd-nof}), we recover diversity estimates of similar magnitude to the inferred richness trajectories by models with fossils fully integrated into the phylogeny (Fig.~\crefrange{fig:ltt-cfbd}{fig:ltt-cobd} and \crefrange{fig:ltt-fbdd}{fig:ltt-obdd}). However, the uncertainty of the estimate is much higher.
+
+\begin{figure}[!ht]
+    \centering
+    \begin{subfigure}{0.24\linewidth}
+		\caption{BD}
+        \includegraphics[width=\linewidth]{Images/CBD_Cetaceans_2000000iter_LTT.pdf}
+		\label{fig:ltt-cbd}
+    \end{subfigure}
+    \begin{subfigure}{0.24\linewidth}
+		\caption{OBD-noF}
+        \includegraphics[width=\linewidth]{Images/COBD_rmFossils_Cetaceans_50000000iter_LTT.pdf}
+		\label{fig:ltt-cobd-nof}
+    \end{subfigure}
+    \begin{subfigure}{0.24\linewidth}
+		\caption{FBD}
+        \includegraphics[width=\linewidth]{Images/CFBD_Cetaceans_2000000iter_LTT.pdf}
+		\label{fig:ltt-cfbd}
+    \end{subfigure}
+    \begin{subfigure}{0.24\linewidth}
+		\caption{OBD}
+        \includegraphics[width=\linewidth]{Images/COBD_Cetaceans_2000000iter_LTT.pdf}
+		\label{fig:ltt-cobd}
+    \end{subfigure}
+    \begin{subfigure}{0.24\linewidth}
+		\caption{BDD}
+        \includegraphics[width=\linewidth]{Images/BDD_Cetaceans_10000000iter_LTT.pdf}
+		\label{fig:ltt-bdd}
+    \end{subfigure}
+    \begin{subfigure}{0.24\linewidth}
+		\caption{OBDD-noF}
+        \includegraphics[width=\linewidth]{Images/OBDD_rmFossils_Cetaceans_rateαprior0.1_20000000iter_LTT.pdf}
+		\label{fig:ltt-obdd-nof}
+    \end{subfigure}
+    \begin{subfigure}{0.24\linewidth}
+		\caption{FBDD}
+        \includegraphics[width=\linewidth]{Images/FBDD_Cetaceans_rateαprior0.1_10000000iter_LTT.pdf}
+		\label{fig:ltt-fbdd}
+    \end{subfigure}
+    \begin{subfigure}{0.24\linewidth}
+		\caption{OBDD}
+        \includegraphics[width=\linewidth]{Images/OBDD_Cetaceans_rateαprior0.1_10000000iter_LTT.pdf}
+		\label{fig:ltt-obdd}
+    \end{subfigure}
+    \caption{\textbf{Inferred species richness over time across models.} Each panels shows the inferred number of cetacean lineages over time with a given model, conditioned on the reconstructed tree and recorded occurrences. The gray line is the median value across the augmented trees in the combined MCMC samples from the 5 replicate analyses. The 5 overlapping black lines represent the lineage-through-time curves from the reconstructed phylogeny of each replicate. Dark and light yellow areas represent 50\% and 95\% credible intervals.}
+    \label{fig:cetacea-richness}
+\end{figure}
+
+The diffusion models (BDD, OBDD-noF, FBDD, OBDD) infer richness trajectories that are qualitatively similar to their homogeneous counterparts, albeit with higher maximum richness levels (especially for OBDD-noF). However, looking at the average diversification rates over time, Fig.~\ref{fig:λTT-μTT-fbdd} and \ref{fig:λTT-μTT-obdd} demonstrate that, even though the overall richness patterns are comparable, the incorporation of rate diffusion detects clear variations in the rate trajectories. Both the FBDD and OBDD models infer a rise of speciation rates up to 35 million years ago, followed by a slow decrease, while extinction rates exhibit three major peaks at approximately 40, 27, and 3 Ma, either matching or most recently exceeding speciation rates. In contrast, the BDD model, as shown in Figure~\ref{fig:λTT-μTT-bdd}, infers low and nearly constant speciation rates ($\sim$0.15 per million species years, MSY), with extinction rates that steadily decline over time and are lower than speciation rates for most of the group's history. Constant rate models infer speciation and extinction rates that are close to averaged heterogeneous rates (see panels \ref{fig:λTT-μTT-cbd} to \ref{fig:λTT-μTT-cobd}). The BD model (\ref{fig:λTT-μTT-cbd}) infers the lowest rates and higher speciation than extinction, while the models with phylogenetic fossils and/or occurrences infer negligible net-diversification rates.
+
+The reconstructed diversity trajectories for constant-rate models with fossils (Fig.~\crefrange{fig:ltt-cobd-nof}{fig:ltt-cobd}) may seem surprising given the estimated diversification rates (Fig.~\crefrange{fig:λTT-μTT-cobd-rmfossils}{fig:λTT-μTT-cobd}), as hump-shaped diversity curves are not expected under constant net diversification rates. In fact, the diversity curves reconstructed here should not be interpreted as expected diversity curves under the inferred models, as in \citet{etienne_diversity-dependence_2011, billaud_estimating_2019}, but as curves conditioned on the observed data. The past diversity estimates are indeed reconstructed from the distribution of augmented complete phylogenies produced by the data augmentation procedure, which is conditioned on the reconstructed phylogeny and fossil occurrences. This distribution is therefore equivalent to the diversity curve conditioned on the data for the homogeneous OBD model described in \citet{manceau_probability_2021}, whose algorithm was implemented by \citet{andreoletti_occurrence_2022} in RevBayes.
+
+The remaining panels in Figure~\ref{fig:cetacea-rates} show sampling rates for the models with fossils. Occurrence sampling rates are higher than those of phylogenetic fossils, as expected, and the inferred rates in each time period are generally very similar between homogeneous (\crefrange{fig:ψTT-cfbd}{fig:ωTT-cobd-rmfossils}) and heterogeneous (\crefrange{fig:ψTT-fbdd}{fig:ωTT-obdd-rmfossils}) models. Both sampling rates are reduced in the 3 delimited geological periods of expected low preservation (see \nameref{Methods}), and particularly in the Rupelian (33,9-28,1 Ma).
+
+\begin{figure}[!ht]
+    \centering
+    \begin{subfigure}{0.24\linewidth}
+		\caption{BD}
+        \includegraphics[width=\linewidth]{Images/CBD_Cetaceans_2000000iter_λTT_μTT.pdf}
+		\label{fig:λTT-μTT-cbd}
+    \end{subfigure}
+    \begin{subfigure}{0.24\linewidth}
+		\caption{OBD-noF}
+        \includegraphics[width=\linewidth]{Images/COBD_rmFossils_Cetaceans_50000000iter_λTT_μTT.pdf}
+		\label{fig:λTT-μTT-cobd-rmfossils}
+    \end{subfigure}
+    \begin{subfigure}{0.24\linewidth}
+		\caption{FBD}
+        \includegraphics[width=\linewidth]{Images/CFBD_Cetaceans_2000000iter_λTT_μTT.pdf}
+		\label{fig:λTT-μTT-cfbd}
+    \end{subfigure}
+    \begin{subfigure}{0.24\linewidth}
+		\caption{OBD}
+        \includegraphics[width=\linewidth]{Images/COBD_Cetaceans_2000000iter_λTT_μTT.pdf}
+		\label{fig:λTT-μTT-cobd}
+    \end{subfigure}
+    \begin{subfigure}{0.24\linewidth}
+		\caption{BDD}
+        \includegraphics[width=\linewidth]{Images/BDD_Cetaceans_10000000iter_λTT_μTT.pdf}
+		\label{fig:λTT-μTT-bdd}
+    \end{subfigure}
+    \begin{subfigure}{0.24\linewidth}
+		\caption{OBDD-noF}
+        \includegraphics[width=\linewidth]{Images/OBDD_rmFossils_Cetaceans_rateαprior0.1_20000000iter_λTT_μTT.pdf}
+		\label{fig:λTT-μTT-obdd-rmfossils}
+    \end{subfigure}
+    \begin{subfigure}{0.24\linewidth}
+		\caption{FBDD}
+        \includegraphics[width=\linewidth]{Images/FBDD_Cetaceans_rateαprior0.1_10000000iter_λTT_μTT.pdf}
+		\label{fig:λTT-μTT-fbdd}
+    \end{subfigure}
+    \begin{subfigure}{0.24\linewidth}
+		\caption{OBDD}
+        \includegraphics[width=\linewidth]{Images/OBDD_Cetaceans_rateαprior0.1_10000000iter_λTT_μTT.pdf}
+		\label{fig:λTT-μTT-obdd}
+    \end{subfigure}
+    \begin{subfigure}{0.24\linewidth}
+		%\caption{BD}
+        \phantom{\framebox[\linewidth]{\rule{0pt}{80pt}}}
+    \end{subfigure}
+    \begin{subfigure}{0.24\linewidth}
+		\caption{OBD-noF}
+        \includegraphics[width=\linewidth]{Images/COBD_rmFossils_Cetaceans_50000000iter_ωTT.pdf}
+		\label{fig:ωTT-cobd-rmfossils}
+    \end{subfigure}
+    \begin{subfigure}{0.24\linewidth}
+		\caption{FBD}
+        \includegraphics[width=\linewidth]{Images/CFBD_Cetaceans_2000000iter_ψTT.pdf}
+		\label{fig:ψTT-cfbd}
+    \end{subfigure}
+    \begin{subfigure}{0.24\linewidth}
+		\caption{OBD}
+        \includegraphics[width=\linewidth]{Images/COBD_Cetaceans_2000000iter_ψTT_ωTT.pdf}
+		\label{fig:ψTT-ωTT-cobd}
+    \end{subfigure}
+    \begin{subfigure}{0.24\linewidth}
+		%\caption{BDD}
+        \phantom{\framebox[\linewidth]{\rule{0pt}{80pt}}}
+    \end{subfigure}
+    \begin{subfigure}{0.24\linewidth}
+		\caption{OBDD-noF}
+        \includegraphics[width=\linewidth]{Images/OBDD_rmFossils_Cetaceans_rateαprior0.1_20000000iter_ωTT.pdf}
+		\label{fig:ωTT-obdd-rmfossils}
+    \end{subfigure}
+    \begin{subfigure}{0.24\linewidth}
+		\caption{FBDD}
+        \includegraphics[width=\linewidth]{Images/FBDD_Cetaceans_rateαprior0.1_10000000iter_ψTT.pdf}
+		\label{fig:ψTT-fbdd}
+    \end{subfigure}
+    \begin{subfigure}{0.24\linewidth}
+		\caption{OBDD}
+        \includegraphics[width=\linewidth]{Images/OBDD_Cetaceans_rateαprior0.1_10000000iter_ψTT_ωTT.pdf}
+		\label{fig:ψTT-ωTT-obdd}
+    \end{subfigure}
+    \caption{\textbf{Inferred cetacean diversification and sampling rates across diversification models.} Panels a-h show inferred speciation (blue) and extinction (red) rates over time. The line is the median value averaged at each given time over all the branches, observed or augmented, in the combined MCMC samples of the 5 replicate analyses. Panels i-n show inferred piecewise-constant sampling rates of phylogenetic fossils (brown) and occurrences (orange) over time, when applicable. For all panels, dark and light shaded areas represent 50\% and 95\% credible intervals.}
+    \label{fig:cetacea-rates}
+\end{figure}
+
+\subsection{Heterogeneous Cetacean diversification}
+
+The inclusion of heterogeneous rates in diffusion models reveals significant variation in diversification rates between different clades. Based on the phylogeny of extant species, the BDD model infers markedly higher net-diversification rates for the Delphinidae family, up to 0.4 per Million Species Years (MSY), as shown in Figure~\ref{fig:tree-nd-bdd}, compared to other lineages that exhibit rates between -0.1 and 0.2 per MSY. This difference is mainly due to higher speciation rates in this family (panel \ref{fig:tree-sp-bdd}) rather than reduced extinction.
+
+The diffusion models with phylogenetic fossils, including FBDD and OBDD, capture even stronger levels of rate heterogeneity across cetacean lineages (panels \ref{fig:tree-nd-fbdd} and \ref{fig:tree-nd-obdd}), with most clades exhibiting high net-diversification rates at their origins, followed by a progressive decline, except for those that gave rise to modern cetacean families. This trend is due, in most individual lineages, both to a strong decline in speciation rate (panels \crefrange{fig:tree-sp-obdd-rmfossils}{fig:tree-sp-obdd}) and to an increase in extinction (panels \crefrange{fig:tree-ext-obdd-rmfossils}{fig:tree-ext-obdd}).
+
+\begin{figure}[!ht]
+    \centering
+
+    % Column labels
+    \begin{subfigure}[b]{0.03\linewidth}
+        % Empty subfigure for alignment
+    \end{subfigure}
+    \begin{subfigure}[b]{0.23\linewidth}
+        \centering
+        \textbf{BDD}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.23\linewidth}
+        \centering
+        \textbf{OBDD-noF}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.23\linewidth}
+        \centering
+        \textbf{FBDD}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.23\linewidth}
+        \centering
+        \textbf{OBDD}
+    \end{subfigure}
+
+    % First row of images (augmented trees)
+    \begin{subfigure}[b]{0.03\linewidth}
+        \raisebox{12mm}{\rotatebox{90}{One augmented tree}}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.23\linewidth}
+        \caption{}
+        \includegraphics[width=\linewidth]{Images/BDD_Cetaceans_10000000iter_tree.pdf}
+        \label{fig:tree-bdd}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.23\linewidth}
+        \caption{}
+        \includegraphics[width=\linewidth]{Images/OBDD_rmFossils_Cetaceans_rateαprior0.1_20000000iter_tree.pdf}
+        \label{fig:tree-obdd-rmfossils}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.23\linewidth}
+        \caption{}
+        \includegraphics[width=\linewidth]{Images/FBDD_Cetaceans_rateαprior0.1_10000000iter_tree.pdf}
+        \label{fig:tree-fbdd}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.23\linewidth}
+        \caption{}
+        \includegraphics[width=\linewidth]{Images/OBDD_Cetaceans_rateαprior0.1_10000000iter_tree.pdf}
+        \label{fig:tree-obdd}
+    \end{subfigure}
+
+    % Second row of images (lambda)
+    \begin{subfigure}[b]{0.03\linewidth}
+        \raisebox{17mm}{\rotatebox{90}{$\lambda$}}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.23\linewidth}
+        \caption{}
+        \includegraphics[width=\linewidth]{Images/BDD_Cetaceans_10000000iter_seed0_tree_λ.pdf}
+        \label{fig:tree-sp-bdd}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.23\linewidth}
+        \caption{}
+        \includegraphics[width=\linewidth]{Images/OBDD_rmFossils_Cetaceans_rateαprior0.1_20000000iter_seed0_tree_λ.pdf}
+        \label{fig:tree-sp-obdd-rmfossils}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.23\linewidth}
+        \caption{}
+        \includegraphics[width=\linewidth]{Images/FBDD_Cetaceans_rateαprior0.1_10000000iter_seed0_tree_λ.pdf}
+        \label{fig:tree-sp-fbdd}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.23\linewidth}
+        \caption{}
+        \includegraphics[width=\linewidth]{Images/OBDD_Cetaceans_rateαprior0.1_10000000iter_seed0_tree_λ.pdf}
+        \label{fig:tree-sp-obdd}
+    \end{subfigure}
+
+    % Third row of images (mu)
+    \begin{subfigure}[b]{0.03\linewidth}
+        \raisebox{17mm}{\rotatebox{90}{$\mu$}}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.23\linewidth}
+        \caption{}
+        \includegraphics[width=\linewidth]{Images/BDD_Cetaceans_10000000iter_seed0_tree_μ.pdf}
+        \label{fig:tree-ext-bdd}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.23\linewidth}
+        \caption{}
+        \includegraphics[width=\linewidth]{Images/OBDD_rmFossils_Cetaceans_rateαprior0.1_20000000iter_seed0_tree_μ.pdf}
+        \label{fig:tree-ext-obdd-rmfossils}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.23\linewidth}
+        \caption{}
+        \includegraphics[width=\linewidth]{Images/FBDD_Cetaceans_rateαprior0.1_10000000iter_seed0_tree_μ.pdf}
+        \label{fig:tree-ext-fbdd}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.23\linewidth}
+        \caption{}
+        \includegraphics[width=\linewidth]{Images/OBDD_Cetaceans_rateαprior0.1_10000000iter_seed0_tree_μ.pdf}
+        \label{fig:tree-ext-obdd}
+    \end{subfigure}
+
+    % Fourth row of images (lambda - mu)
+    \begin{subfigure}[b]{0.03\linewidth}
+        \raisebox{14mm}{\rotatebox{90}{$\lambda - \mu$}}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.23\linewidth}
+        \caption{}
+        \includegraphics[width=\linewidth]{Images/BDD_Cetaceans_10000000iter_seed0_tree_nd.pdf}
+        \label{fig:tree-nd-bdd}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.23\linewidth}
+        \caption{}
+        \includegraphics[width=\linewidth]{Images/OBDD_rmFossils_Cetaceans_rateαprior0.1_20000000iter_seed0_tree_nd.pdf}
+        \label{fig:tree-nd-obdd-rmfossils}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.23\linewidth}
+        \caption{}
+        \includegraphics[width=\linewidth]{Images/FBDD_Cetaceans_rateαprior0.1_10000000iter_seed0_tree_nd.pdf}
+        \label{fig:tree-nd-fbdd}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.23\linewidth}
+        \caption{}
+        \includegraphics[width=\linewidth]{Images/OBDD_Cetaceans_rateαprior0.1_10000000iter_seed0_tree_nd.pdf}
+        \label{fig:tree-nd-obdd}
+    \end{subfigure}
+
+    \caption{\textbf{Branch-specific cetacean diversification rates across diffusion models.} Panels a-d display samples of complete phylogenies from the MCMC posteriors, with reconstructed branches in black and augmented branches in gray. The remaining panels show the median posterior rates on the reconstructed phylogeny, with branch-specific speciation, extinction and net-diversification rates on the second (e-h), third (i-l) and fourth (m-p) row, respectively.}
+    \label{fig:cetacea-rates-phylo}
+\end{figure}
+
+\FloatBarrier
+\section{Discussion} \label{Discussion}
+
+\subsection{Fossils are key to understand the past under BDD models}
+
+Our results demonstrate the importance of incorporating fossil evidence to accurately reconstruct diversification histories. The two models we used here that rely solely on phylogenies (BD and BDD) drastically underestimate the historical diversity of cetaceans reflected in the fossil record. Since these models are well calibrated, we assume that the discrepancy arises from model misspecification, specifically imposing constant and homogeneous diversification rates for the BD model and geometric Brownian motion dynamics for the BDD model. The integration of fossil evidence likely mitigates the impact of these misspecifications. \citet{morlon_reconciling_2011, mazet_estimating_2023} were able to recover a humped-shaped diversity pattern from a phylogeny of extant cetacean species, suggesting that the model they used, which allowed large shifts in speciation and extinction dynamics at the base of major families, better represents the true dynamics of cetaceans. However, making such a priori hypotheses could in turn be the source of model misspecification in other clades. Instead, the flexibility offered by models such as the BDD, if complemented with fossil information, can recover accurate dynamics and be more immune to misspecification issues. In the case of cetaceans, BDD models enhanced with fossil data were able to recover diversification shifts at the base of families and boom-bust diversity dynamics, even though such dynamics are rather unlikely under the BDD process. This is consistent with the findings of \citet{quintero_imbalanced_2024} showing that BDD models can recover clade-wide shifts in diversification rates. 
+
+The integration of fossil occurrences shows the value of these additional data, in particular in the absence of fossils whose phylogenetic placement can be inferred: occurrences alone improve the reconstruction of hidden diversity. However, they are less informative than fossils placed in the phylogeny, especially when many of these fossils are available, as is the case for cetaceans. We expect occurrences to be most valuable for accurately estimating diversification rates in epochs where fossil information from phylogenies is sparse, or in groups that lack such fossils altogether. In some groups, it should be possible to use other data reflecting a clade's total species richness over time as a type of occurrence that can be used in addition to the phylogeny. These alternative occurrences could include teeth, scales, plant organs (leaves, seeds, pollen), biochemical proxies, ichnofossils (trace fossils), coprolites. Many of these remains can be identified as part of the clade, but cannot be associated to other parts of the whole organism that are used for species identification (e.g. the skeleton) and are as such described in parallel parataxonomies that usually cannot be mapped to the clade's main taxonomy. This fact thus prevents them from being incorporated in the phylogeny in an FBD analysis, but not as occurrences in an OBD analysis, as long as they can be unambiguously attributed to the clade of interest.
+
+Importantly, the fossil record is inherently incomplete, limiting our direct observation of past diversity. This incompleteness poses a significant challenge for methods that rely solely on the observed fossil record \citep{silvestro_bayesian_2014}. In contrast, the phylogenetic modeling framework, including all models presented here, capitalizes on phylogenetic relationships to infer the existence of unsampled lineages. This represents one of the advantages of the total-evidence approach to reconstruct past diversification histories.
+
+\subsection{Heterogeneous rates give us a refined view of a clade's evolution}
+
+Interestingly, rate heterogeneity appears to have a limited influence on the estimated past diversity, which is already well constrained by fossils and occurrences. This is notable given that heterogeneous models were compared to constant-rate homogeneous models, whereas time-varying models may capture additional temporal dynamics. The inclusion of heterogeneity in the diffusion models (BDD, FBDD, OBDD) is thus most valuable for flexibly capturing variations in diversification rates at various scales, and using them to generate hypotheses on the evolutionary pressures, such as environmental changes or clade-specific factors, that may have influenced the diversification of a clade. These hypotheses can then be tested using models specifically designed for this purpose \citep{morlon_phylogenetic_2024}.
+
+At the individual lineage level, we observe a general decline in net-diversification rates (similar to the \say{insidious loss of species macroevolutionary fitness} described in \citet{quintero_rise_2025}), except for a few lineages that maintain their speciation potential and give rise to most of the subsequent diversity. This selection effect matches the pattern of imbalanced speciation pulses observed in \citet{quintero_imbalanced_2024}, as well as the theoretical predictions under a model of evolutionary tempo by \citet{budd_evolutionary_2025}.
+
+\subsection{The diversification history of cetaceans based on their complete fossil record}
+
+The occurrence-based models (OBD and OBDD) recover a hump-shaped pattern, in line with previous fossil and molecular studies \citep{morlon_reconciling_2011}, but with higher diversity. In particular, they reproduce the rapid decline in the past 5 Myr that has previously been linked to global climate cooling and the Northern Hemisphere glaciation \citep{andreoletti_occurrence_2022}. This pattern broadly matches the one obtained at the genus level in \citet{andreoletti_occurrence_2022}, although it differs in including a short decline in the late Oligocene (25 Ma) and a maximum attained in the Mid-Miocene (12 Ma) instead of the Pliocene (around 4.5 Ma).
+
+Looking at the average rate trajectories over time, especially the ones inferred with the FBDD and OBDD models which incorporate the most information, it appears that extinction is the main driver of variations in diversification trends on the scales of millions of years, although it is concomitant with a long-term decline in speciation rates that together explain the decline of cetaceans. The second spike of extinction around 27 million years ago corresponds to the extinction of many archaeocetes, the stem cetacean lineages, soon after the emergence of the two modern groups, Mysticeti and Odontoceti. 
+These diversification rate trajectories are consistent with the trends inferred by \citet{quintero_rise_2025} using a variant of the FBDD model. Their analysis incorporates additional occurrences to inform the fossil sampling rate in order to correct for the common failure to include multiple fossils of the same morphospecies, but this only includes occurrences of morphospecies present in the phylogeny. Despite these similar trends, our estimated rates are approximately 50\% higher overall than those reported by \citet{quintero_rise_2025}, and the lineage diversity in our FBDD and OBDD results is nearly double. This discrepancy likely arises from our approach of distinguishing the processes for sampling phylogenetic fossils on one side and fossil occurrences on the other. In \citet{quintero_rise_2025}, including occurrences as additional sampled ancestors increases the sampling rate in the tree, which in turn decreases the estimated diversity, speciation rates, and extinction rates.
+
+Considering variations among cetacean lineages, most long-lived species tend to see their net-diversification rate progressively decline, including many modern species. An exception is the Delphinidae family, which diversified rapidly in the past 10 Myr and displays higher net diversification rates close to the present. This likely reflects a combination of late Miocene–Pleistocene oceanographic reorganizations (closure of Tethys and the Central American Seaway, fluctuating seaway connections around southern Africa) and large sea-level oscillations, which repeatedly created opportunities for allopatric splits across oceanic basins, together with some delphinid traits (broad diets, social foraging) that allowed them to thrive under shifting, nutrient-rich environments driven by upwelling. \citep{gowans_social_2007, steeman_radiation_2009, do_amaral_historical_2018}. The findings align with \citet{barido-sottani_clads_2023}, which identified the highest speciation rates in the Delphinidae family using ClaDS, another heterogeneous diversification model with branch-specific rates. A key methodological difference between the two studies is that \citet{barido-sottani_clads_2023} inferred the phylogeny together with the diversification rates, while we applied here the diffusion models on a fixed reconstructed phylogeny. This phylogeny was obtained using an FBD prior with homogeneous diversification rates, which could generate biases \citet{barido-sottani_clads_2023}. The convergence of results obtained here versus in \citet{barido-sottani_clads_2023} suggests that the sequential approach (i.e., reconstructing the phylogeny first) can be robust. Still, it would be useful in the future to allow joint reconstruction inference with diffusion models.
+
+\section{Conclusion}
+
+We introduced the Occurrence Birth-Death Diffusion (OBDD) process, a new model that integrates fossil occurrences and accommodates heterogeneous diversification rates across lineages. Our analyses show that fossils are essential for accurately reconstructing diversification histories under diffusion models. Occurrences provide additional refinements that are particularly useful when phylogenetic fossils are sparse. In cetaceans, accounting for rate heterogeneity revealed important variations among lineages and during lineage lifetimes, as well as several periods of increased extinction.
+
+Looking ahead, the OBDD model opens new avenues. Occurrences can often be attributed to specific subclades, and incorporating this information - similar to the use of topological constraints in traditional FBD analyses \citep{baridosottani_putting_2023} - would provide more direct insights into lineage-specific rates. In some cases, occurrences might be identified at the morphospecies level, offering even finer resolution \citep{silvestro_bayesian_2014, stadler_fossilized_2018}.  Additionally, model accuracy may be enhanced by coupling the classical fossil sampling rate with the occurrence sampling rate instead of inferring them independently, as these rates are expected to partially co-vary. These fossil sampling rates could also be allowed to evolve gradually along branches of the phylogeny, capturing variations in sampling across species and extending existing models with heterogeneous sampling processes \citep{barido-sottani_integrating_2025}.  These developments augur an exciting trajectory for models that, with ever-greater data integration and flexibility, can gradually uncover more subtle complexities of past evolutionary processes.
+
+\section{Funding Acknowledgment}
+
+This work was supported by the École Normale Supérieure de Paris (doctoral fellowship to J.A.).
+
+\section{Acknowledgment}
+
+The authors thank the members of the Morlon team for their feedback on an earlier version of this manuscript.
+
+\section{Competing interests}
+
+The authors report no conflict of interest.
+
+\section*{Data Availability Statement}
+
+The code and data for reproducing the analyses are available at https://github.com/Jeremy-Andreoletti/OBDD.
+
+\section{Funding information}
+
+J.A. is supported by a doctoral fellowship from the École Normale Supérieure de Paris. H.M. acknowledges support from the European Research Council (grant CoG-PANDA).
+
+\section{Authors' contributions}
+
+J.A. and H.M. designed the project. I.Q. contributed the initial BDD and FBDD codes. J.A. wrote the OBDD code, performed the analyses, and wrote the first draft of the paper. All authors discussed the research and contributed to the writing and editing of the article.
+
+
+\clearpage
+
+{
+\singlespacing            % force single line spacing
+\setlength{\parskip}{0pt}  % remove extra space between paragraphs
+\bibliography{OBDD_Cetacea}
+}
+
+\clearpage
+\begin{appendices}
+\setcounter{figure}{0}
+\counterwithin{figure}{section}
+
+\section{Likelihood of the complete tree} \label{SM-likelihood}
+
+Following \citet{quintero_rise_2025} for the FBDD model, we approximate the likelihood of a complete tree $\Psi$ under the OBDD model by generating augmented discrete GBM paths along branches of the complete trees.
+Using the same notations for consistency, we set a small time step $\delta = t_{i+1} - t_{i}$ and divide each branch of the tree into $m$ steps such that $m = \left \lfloor{t_b / \delta}\right \rfloor + 1$, where $t_b$ represents the edge length of branch $b$.
+For a branch $b$, which starts at $t_s$ and ends at $t_f$, we sample the data augmented diffusion process at times $t = \{t_1 = t_s, t_2 = t_1 + \delta, \dots, t_{m+1} = t_f\}$. We thus obtain the stochastic evolution of speciation $\Lambda_b = \{\lambda_b(t_1), \dots, \lambda_b(t_{m+1})\}$ and of extinction $\text{M}_b = \{\mu_b(t_1), \dots, \mu_b(t_{m+1})\}$ in a discrete time grid.
+Thereafter $\lambda_l(t_i)$ is simplified as $\lambda_i$ (and thus $\lambda_l(t_b) = \lambda_b)$ and $\mu_l(t_i)$ as $\mu_i$.
+
+The combined likelihood for the complete tree $\Psi$ (including internal branches $\Psi_I$ and extinct branches $\Psi_{\text{T}_{\mu}}$) and record of occurrences $\Omega$ given the OBDD model parameters as well as the branch-specific speciation and extinction rates, $\Lambda$ and M respectively, is the following:
+\begin{align*}
+\begin{split}
+  l(& \Psi, \Omega | \Lambda, \text{M}, \lambda_0, \mu_0, \psi, \omega, \alpha_{\lambda}, \alpha_{\mu}, \sigma_{\lambda}, \sigma_{\mu}) = l(\Psi | \Lambda, \text{M}, \lambda_0, \mu_0, \psi, \alpha_{\lambda}, \alpha_{\mu}, \sigma_{\lambda}, \sigma_{\mu}) \times l(\Omega | \Psi, \omega) =\\
+  & \prod_{p \in P} f_p \psi_p \prod_{b \in \Psi_{\text{I}}} \lambda_b \prod_{b \in \Psi_{\text{T}_{\mu}}} \mu_{b}
+  \prod_{b \in \Psi} \prod_{i = 1}^{m} p(\text{no event on the tree in}\,[t_i, t_{i+1}], \lambda_{i+1}, \mu_{i+1}| \lambda_i, \mu_i, \psi_p, \alpha_{\lambda}, \alpha_{\mu}, \sigma_{\lambda}, \sigma_{\mu})\\
+  & \times \prod_{i \in I} e^{-\omega_iL_iN_i} \frac{(\omega_iL_iN_i)^{k_i}}{k_i!},
+\end{split}
+\end{align*}
+
+with $f_p$ the number of phylogenetic fossils in the period $p$ and $k_i$ the number of occurrences in each interval $i$ delimited both by the $P$ periods of sampling rate change and the times of change in the diversity-through-time curve, such that in each interval of length $L_i$ the occurrence sampling rate $\omega_i$ and the number of lineages $N_i$ are constant.
+
+As in \citet{quintero_rise_2025}, the probability that no event happens on the tree during time $\delta = t_{i+1} - t_i$ and that the rates starting at $\lambda_i$ and $\mu_i$ end up at $\lambda_{i+1}$ and $\mu_{i+1}$ can be approximated as:
+\begin{align*}
+  p(& \text{no event on the tree in}\,[t_i, t_{i+1}], \lambda_{i+1}, \mu_{i+1} | \lambda_i, \mu_i, \psi_p, \alpha_{\lambda}, \alpha_{\mu}, \sigma_{\lambda}, \sigma_{\mu}) = \\
+  & \: \exp \left\{- (\bar{\lambda}_{i,i+1} + \bar{\mu}_{i,i+1} + \psi_p) \delta \right\} \: \times
+  \frac{1}{\sigma_{\lambda} \sqrt{2\pi \delta}} \exp \left\{ - \frac{(\Delta \lambda_i - \alpha_{\lambda} \delta)^2 }{ 2 \delta \sigma_{\lambda}^2} \right\} \: \times
+  \frac{1}{\sigma_{\mu} \sqrt{2\pi \delta}} \exp \left\{ - \frac{(\Delta \mu_i - \alpha_{\mu}\delta)^2 }{ 2 \delta \sigma_{\mu}^2} \right\}.
+\end{align*}
+
+\section{MCMC runtime} \label{SM-runtime}
+
+The running time for MCMC inferences under the OBDD model was measured across the 500 simulated datasets from the validation analysis and plotted as a function of the number of tips (including fossil tips). The results are shown in Figure~\ref{fig:running-time}.
+
+We then applied a Generalized Additive Model for Location, Scale, and Shape (GAMLSS), using the \textit{gamlss} package \citep{rigby_generalized_2005, r_core_team_r_2018}, to model the running time as a function of the number of extant tips, the number of fossils, and the number of fossil occurrences. The GAMLSS framework allows us to model both the mean and variance structures separately, thus dealing with heteroscedasticity. We used a Gamma distribution for the response variable (running time), which is appropriate for modelling positive continuous data. The mean structure was modelled using a penalized B-spline (P-spline) for the number of extant tips and linear terms for the number of fossils and fossil occurrences. Additionally, the scale (variance) of the model was allowed to depend on the number of extant tips. Only trees with at least 15 tips were retained in order to obtain normally distributed residuals and correct diagnostic plots.
+
+Here is the resulting summary:
+\begin{verbatim}
+> summary(gamlss_model)
+******************************************************************
+Family:  c("GA", "Gamma") 
+
+Call:  gamlss(formula = running_time ~ pb(ntipsextant) + nfossils +  
+    nocc, sigma.formula = ~ntipsextant, family = GA(mu.link = "identity",  
+    sigma.link = "log"), data = subset(parameters_OBDD, par == "lambda" & ntips > 15)) 
+
+Fitting method: RS() 
+
+------------------------------------------------------------------
+Mu link function:  identity
+Mu Coefficients:
+                  Estimate Std. Error t value Pr(>|t|)    
+(Intercept)      0.2627590  0.0287025   9.155 8.15e-16 ***
+pb(ntipsextant)  0.0056901  0.0002565  22.183  < 2e-16 ***
+nfossils        -0.0009767  0.0005983  -1.632    0.105    
+nocc             0.0001322  0.0001147   1.152    0.251    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+------------------------------------------------------------------
+Sigma link function:  log
+Sigma Coefficients:
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept) -0.2930249  0.0756514  -3.873 0.000165 ***
+ntipsextant -0.0075807  0.0007572 -10.011  < 2e-16 ***
+******************************************************************
+\end{verbatim}
+
+
+While the number of extant tips has a significant non-linear effect on the running time, we found no significant relationship between the running time and the number of fossils or number of fossil occurrences. These results indicate that tree size mostly determines the computational burden and that including fossils have a negligible impact.
+
+\section{Cetacean occurrences over time} \label{SM-OTT}
+
+Occurrence ages are sampled uniformly within their age uncertainty ranges at the beginning of each analysis. Figure~\ref{fig:OTT} represents their temporal distribution for the 5 random seeds that were used.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.7\linewidth]{Images/OccurrencesTT.pdf}
+    \caption{\textbf{Temporal distribution of cetacean occurrences with age uncertainty.} These histograms illustrate the temporal distribution of cetacean occurrences over the Cenozoic. Results are overlaid for the five different sampling seeds used to uniformly sample within the age uncertainty ranges of the fossil occurrences.}
+    \label{fig:OTT}
+\end{figure}
+
+\section{Drivers of estimation error} \label{SM-NMLE}
+
+To explore the drivers of estimation error in the OBDD model parameters, we employed a generalized linear model (GLM) with the \textit{stats} package in R \citep{r_core_team_r_2018} to predict the Normalized Mean Squared Error (NMSE) for each parameter based on some characteristics of the simulated datasets from the validation analysis. These predictors are the number of extant tips, the number of fossils, the number of fossil occurrences, and the interaction between fossils and occurrences. We extracted estimated coefficients from these models and calculated the predicted mean influence of each predictor on the estimation error.
+
+The analysis covered the following OBDD model parameters:
+\begin{itemize}
+    \item $\lambda_0$: Initial speciation rate.
+    \item $\mu_0$: Initial extinction rate.
+    \item $\alpha_{\lambda}$: Speciation rate trend.
+    \item $\alpha_{\mu}$: Extinction rate trend.
+    \item $\sigma_{\lambda}$: Diffusion variance for speciation.
+    \item $\sigma_{\mu}$: Diffusion variance for extinction.
+    \item $\psi_1$, $\psi_2$: Fossil sampling rates in 2 epochs.
+    \item $\omega_1$, $\omega_2$: Fossil occurrence sampling rates in 2 epochs.
+\end{itemize}
+
+The $\log(\text{NMSE})$ for each parameter was modelled as a function of the logarithm of the number of extant tips ($\log(\text{ntipsextant})$), the square root of the number of fossils ($\sqrt{\text{nfossils}}$), the square root of the number of fossil occurrences ($\sqrt{\text{nocc}}$), and the interaction between the number of fossils and occurrences ($\sqrt{\text{nfossils}}:\sqrt{\text{nocc}}$). There may be 0 occurrences or fossils, so a logarithmic transformation was not appropriate. For each parameter, we multiplied the coefficients by the average value of the predictors to calculate their predicted influence on estimation error, and display the resulting prediction in Figure~\ref{fig:NMLE-drivers}.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.9\linewidth]{Images/OBDD_drivers_estimation_error.pdf}
+    \caption{\textbf{Drivers of estimation error for OBDD parameters.} This figure displays the drivers of estimation error, measured as the Normalized Mean Squared Error (NMSE). Each column corresponds to a predictor in a Generalized Linear Model:⁡ log of the extant tree size, square root of the number of fossils in the tree, fossils occurrences, and their interaction. Row correspond OBDD model parameters: initial speciation rate ($\lambda_0$), initial extinction rate ($\mu_0$), speciation and extinction trends ($\alpha_{\lambda}$, $\alpha_{\mu}$), diffusion variances ($\sigma_{\lambda}$, $\sigma_{\mu}$), and fossil and occurrence sampling rates for two time intervals ($\psi_1$, $\psi_2$, $\omega_1$, $\omega_2$). The colour of each circle indicates the average multiplicative influence of a predictor on a specific parameter's estimation error, and the circle size also reflects the absolute influence in log scale ($\times 10$ has a similar influence as $\times 1/10$). The shading of each circle reflects the statistical significance (p-value), with darker circles indicating lower p-values (more significant). Predictors with p-values above 0.01 are crossed.}
+    \label{fig:NMLE-drivers}
+\end{figure}
+\end{appendices}
+
+\end{document}

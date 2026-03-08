@@ -1,0 +1,498 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{csquotes}
+\usepackage{amsmath, amssymb}
+
+% Formatting commands
+\definecolor{resp}{RGB}{0,0,160}
+\newenvironment{RC}{\begin{quote}\itshape}{\end{quote}}
+\newcommand{\response}[1]{\noindent\textcolor{resp}{#1}\medskip}
+\newcommand{\todo}{\noindent\textcolor{red}{\textbf{[TODO]}}\medskip}
+
+\setlength{\parskip}{0.4em}
+\setlength{\parindent}{0pt}
+
+\begin{document}
+
+\begin{center}
+{\LARGE \textbf{Response to Reviews}}\\[8pt]
+{\large Manuscript USYB-2025-225}\\[4pt]
+{\large \textit{The Occurrence Birth-Death Diffusion Process:\\Unraveling Diversification Histories with Fossils and Heterogeneous Rates}}\\[8pt]
+J\'er\'emy Andr\'eoletti, Ignacio Quintero, H\'el\`ene Morlon\\[12pt]
+\end{center}
+
+Dear Editor, Associate Editor, and Reviewers,
+
+Thank you for the thoughtful and constructive reviews of our manuscript. We are grateful for the opportunity to revise and resubmit. We have carefully addressed all comments below, and all changes in the revised manuscript are highlighted in blue. Our responses appear in \textcolor{resp}{blue} below.
+
+\bigskip\noindent\rule{\linewidth}{0.8pt}\bigskip
+
+%% ============================================================
+\section*{Associate Editor (Dr.\ April Wright)}
+%% ============================================================
+
+\begin{RC}
+Like Dr.\ Wagner, I was not enamored of the terms "phylogenetic fossil" and "occurrence fossil." With occurrence fossils affecting the probability of trees and tree shapes under the FBD, all fossils are to some degree phylogenetic fossils. I like the terminology of uncoded (the specimens for which there is no coded data) and coded.
+\end{RC}
+
+\response{We agree that our previous terminology was confusing, and could conflict with the established paleontological meaning of "fossil occurrence." Following the Associate Editor's and Reviewer~3's suggestions, we now use "coded fossils" for those placed in the phylogeny and "uncoded occurrences" for those that are not, throughout the manuscript.}
+
+\begin{RC}
+In Figure 1 of his review, Dr.\ Wagner points to an issue that I think is the most single important for the authors to consider and address. That issue is that it doesn't seem (in whales) that coded and uncoded fossils actually do come from different distributions and therefore need to be modeled differently. [...] So, in my opinion, there's a very central "Why?" hanging over this manuscript.
+\end{RC}
+
+\response{We address this concern in detail in our response to R3.2. In short, our model with separate rates $\psi$ (coded fossils) and $\omega$ (uncoded occurrences) is strictly equivalent to a model with a single total fossil sampling rate $\varphi = \psi + \omega$ and a Binomial coding probability $p = \psi/(\psi+\omega)$. The two rates allow the proportion of coded fossils and its variation over time to be estimated from the data rather than fixed in advance. We agree that for cetaceans this proportion likely does not vary much across time periods, and we now clarify this in the revised manuscript (see Methods and Discussion).}
+
+\begin{RC}
+Both other reviewers point to some unclarity in the description of the augmented tree approach. I think as written, it reads fine, but I agree with Reviewer One that this is an approach that is likely to be unknown to readers, and a figure might be warranted. I'm a moderate on that point -- I think it would help readers, but there are a lot of graphics in this manuscript already.
+\end{RC}
+
+\response{We have added a new figure (Fig.~2) illustrating the data augmentation approach, as detailed in our response to Reviewer~1 (R1.2 below).}
+
+\begin{RC}
+Both reviewers note that Figure 4 makes it seem like the analyses can be run to completion very quickly, which is not the case. I would advise either removing or reconfiguring this figure -- this information is communicated more clearly on Table 1. That would free up some space to compare branch rates across analyses, as suggested by Reviewer Two.
+\end{RC}
+
+\response{We agree that the figure needed to be clearer. We have added a warning in the main text and caption of Figure~5 stating that the runtimes shown reflect an ideal scenario: simulated datasets are generated directly under the model, with smooth diversification dynamics and consequently few augmented branches, which is why runtimes are substantially shorter than for the empirical cetacean analysis. The caption now explicitly directs readers to Table~1 for empirical runtimes. Should the Associate Editor nonetheless prefer to move this figure to the Supplementary Material, we are happy to do so.}
+
+\begin{RC}
+One other thing I want to note is that in his review, Dr.\ Wagner highlights a number of places where this manuscript asserts a sort of naivete about parameters, where long records of literature provide information from which information can be gleaned, or priors derived. For example, using Gamma-distributing sampling rates, when there is a long history in the literature of empirically deriving these, and they tend not to support Gamma-distributions. I think you can make an argument for Gamma and Lognormal being similar enough that it doesn't matter, but the positive argument for doing something that is analytically contraindicated should be made.
+\end{RC}
+
+\response{We agree that the choice of Gamma priors for sampling rates deserves a positive justification. We chose the Gamma distribution because it is conjugate to the Poisson likelihood, enabling Gibbs sampling and substantially faster MCMC mixing. The Gamma and lognormal are both right-skewed unimodal distributions on the positive reals and closely approximate each other in the relevant parameter ranges, so the practical difference is expected to be small; we now make this argument explicitly in the revised manuscript (see also R3.1). More broadly, we have revised the Introduction and Discussion to better engage with the paleobiological literature on sampling rates and diversification dynamics, as detailed in our responses to R3.5, R3.9, R3.13, and R1.8.}
+
+
+\bigskip\noindent\rule{\linewidth}{0.8pt}\bigskip
+
+%% ============================================================
+\section*{Reviewer 1}
+%% ============================================================
+
+% --- R1 Major 1 ---
+\subsection*{R1.1 -- Table comparing models}
+
+\begin{RC}
+It could be helpful to include a table highlighting the difference/similarities between OBDD, OBD, FBDD, and BDD. At the minute the information is sort of scattered across the introduction and methods. A schematic table (features $\times$ models) would help readers see exactly what is gained at each step.
+\end{RC}
+
+\response{This is a helpful suggestion. We have added a comparison table (Table~1) at the end of the Introduction, summarizing the key features of all six models (BD, FBD, OBD, BDD, FBDD, OBDD): inclusion of coded fossils, uncoded occurrences, rate heterogeneity (GBM), and piecewise sampling rates.}
+
+% --- R1 Major 2 ---
+\subsection*{R1.2 -- Augmented tree figure}
+
+\begin{RC}
+Can the authors maybe spend a bit more time explaining the augmented tree approach, perhaps include a figure. This is a new concept to me and it took a while to understand it. If this is a standard approach you can ignore this, but maybe even a small figure would be really helpful.
+\end{RC}
+
+\response{We thank the reviewer for this suggestion. We have added a new figure in the Methods section illustrating the data augmentation approach. The Figure 2 shows (A)~the empirical tree with coded fossils and uncoded occurrences, (B)~one data-augmented tree as sampled during an MCMC iteration, with hidden speciation and extinction events and unsampled extant lineages, and (C,~D)~the latent speciation and extinction rates evolving along the augmented tree.}
+
+% --- R1 Major 3 ---
+\subsection*{R1.3 -- Computational cost and checkpointing}
+
+\begin{RC}
+The cetacean case study required extremely long MCMC runs (up to 100 days, Table 1), with some runs being terminated before the finish. This raises some concerns about practical applicability for most users. For example, users with strict walltimes on their clusters. Is checkpointing implemented? Or can you discuss any approaches to increasing computational efficiency that could be implemented down the line?
+\end{RC}
+
+\todo
+
+% --- R1 Major 4 ---
+\subsection*{R1.4 -- Calibration on larger trees}
+
+\begin{RC}
+The results from the simulation-based calibration study are very impressive but limited to moderate size trees ($\leq$40 tips). Given the cetacean dataset is much larger, would it be worthwhile to include stress tests at higher tree sizes to show that the method remains well-calibrated (or at least does not systematically bias estimates).
+\end{RC}
+
+\response{A fair point, though a substantial number of simulated trees do exceed 40 tips. The primary purpose of the calibration is to verify that the implementation is correct; once validated, the algorithm should scale to arbitrary tree sizes (barring computational limitations). The consistent decrease in estimation error with increasing tree size (Figs.~3 and~4) supports this. We have clarified the point in the text.}
+
+% --- R1 Minor ---
+\subsection*{R1.5 -- Fixed topology stated earlier}
+
+\begin{RC}
+It is implied in the text but it is not until the discussion that you state that you used a fixed topology, could you say that earlier just for clarity?
+\end{RC}
+
+\response{Done. We now state explicitly in the Case Study section that all diversification analyses operate on fixed phylogenies.}
+
+\subsection*{R1.6 -- Figures 2 and 3 captions}
+
+\begin{RC}
+Figure 2 and 3 do not have a caption.
+\end{RC}
+
+\response{We have expanded the captions of Figures 3 and 4 to describe the calibration study and explain the metrics shown (truth recovery proportions and estimation error).}
+
+\subsection*{R1.7 -- Typo: "Aquitalian"}
+
+\begin{RC}
+L 280: "Aquitalian" should be "Aquitanian"
+\end{RC}
+
+\response{Corrected, thank you. We also rephrased the epoch names following Reviewer 3's suggestion (see R3.19).}
+
+\subsection*{R1.8 -- More references on the fossil record}
+
+\begin{RC}
+In the discussion, especially around the fossil record, I think you could include a few more references.
+\end{RC}
+
+\response{Done. Following this suggestion and the detailed references provided by Reviewer~3, we have substantially expanded the citations in the Introduction and Discussion to better engage with the paleobiological literature on sampling, diversification dynamics, and methods for estimating unsampled diversity (see R3.4, R3.5, R3.9--R3.13 for details).}
+
+
+\bigskip\noindent\rule{\linewidth}{0.8pt}\bigskip
+
+%% ============================================================
+\section*{Reviewer 2}
+%% ============================================================
+
+% --- R2 Major 1 ---
+\subsection*{R2.1 -- Figures 2 and 3 captions, NMSE explanation, absolute error}
+
+\begin{RC}
+Figures 2 and 3: These figures need a more elaborate caption, similar to the other figure captions in the manuscript. Consider reminding the readers that these data are based on the calibration study, and please explain how the normalized mean squared error is calculated, either with an equation or in a sentence. Normalizing and squaring can also hide important behaviour, for example it is possible that extinction and speciation are unbiased, but it is also possible that both are overestimated, or that both are underestimated. You may consider adding another figure to supplementary materials, where you plot the absolute estimation error?
+\end{RC}
+
+\response{Done. The captions of Figures 3 and 4 now include a description of the calibration study and a definition of the estimation error metric.}
+
+\response{As suggested, we have added a supplementary figure showing the absolute estimation error (median \emph{a posteriori} minus true value) for each parameter as a function of the number of extant tips in the reconstructed phylogeny. This complements the NMSE by revealing any systematic over- or underestimation bias and how accuracy scales with tree size. Overall, estimation errors are approximately centred near zero, indicating no systematic bias.}
+
+% --- R2 Major 2 ---
+\subsection*{R2.2 -- Branch-specific rate estimation errors}
+
+\begin{RC}
+Assuming that one of the main aims of the paper is to estimate branch-specific diversification rates (as in Figure 7), I was surprised that there were no plots of the estimation error in the estimates of the branch-specific rates. [...] I believe the manuscript would be further strengthened if the error in branch-specific rates would also be plotted and discussed.
+\end{RC}
+
+\response{Unfortunately, the posterior augmented trees from the 500 calibration datasets were not stored, as they are prohibitively voluminous (each tree contains rate trajectories discretised at $10^{-3}$~Myr along every branch, including augmented branches), so we cannot directly assess per-branch rate estimation errors. That said, under the OBDD model branch-specific rates are not free parameters: they are determined by the GBM process parameters ($\lambda_0$, $\mu_0$, $\alpha_\lambda$, $\alpha_\mu$, $\sigma_\lambda$, $\sigma_\mu$) and by the tree topology. Accurate recovery of the global parameters (Figs.~3--4) therefore constrains the branch-specific rates as well.}
+
+% --- R2 Major 3 ---
+\subsection*{R2.3 -- Estimation error vs trend parameter}
+
+\begin{RC}
+I would be curious to see a plot of estimation errors of branch-specific rates on the y-axis, and the trend parameter on the x-axis. My prediction is that in models where there is a positive trend in net-diversification, the estimation error in branch-specific rates should be smaller [...] However addressing this comment is not essential.
+\end{RC}
+
+\response{As noted in R2.2, posterior augmented trees were not stored, so we cannot plot branch-specific rate errors directly. As a proxy, we plotted the NMSE of all global parameters against the true net diversification trend $\alpha_\lambda - \alpha_\mu$ (Supplementary Fig.~D.3). The LOESS curves are essentially flat in all panels, indicating that neither the direction nor the magnitude of the trend parameters has a detectable influence on estimation accuracy. We include this supplementary analysis for completeness.}
+
+% --- R2 Major 4 ---
+\subsection*{R2.4 -- Data augmentation: computational advantages and recommendations}
+
+\begin{RC}
+The authors state that their RevBayes implementation of the OBD model (Andreoletti et al.\ 2022) is computationally slow [...] Aside from model flexibility -- does using augmentation techniques inherently improve the computational efficiency and overall feasibility of the OBD and similar models? Given the authors extensive experience of working with data augmentation techniques, what do you recommend for future developments on diversification inference? Should one use data augmentation or not?
+\end{RC}
+
+\response{The main advantage of data augmentation is model flexibility: by conditioning on the augmented tree, one avoids analytically integrating over all unobserved histories, making it straightforward to add rate heterogeneity or piecewise sampling without rederiving the likelihood. The trade-off is computational: data augmentation allowed us to analyse cetaceans at species level, whereas our analytical OBD implementation in RevBayes (Andreoletti et al.\ 2022) was limited to genus level, but the augmented state space can become expensive when many unobserved lineages must be explored. We recommend data augmentation when model flexibility is a priority and the augmented state space remains tractable, and analytical likelihoods when scalability is the main concern. We have added a paragraph discussing this trade-off in the Conclusion.}
+
+% --- R2 Minor ---
+\subsection*{R2.5 -- Figure 2a (truth recovery) to supplementary}
+
+\begin{RC}
+I'm not so sure how much panel (a) adds to the narrative of the main text of the manuscript, it could be moved to the supplementary if there are space constraints.
+\end{RC}
+
+\response{We appreciate the suggestion. We chose to keep this panel in the main text because it serves as a sanity check that our implementation of the basic OBD model (without GBM rate variation) correctly recovers the known analytical solution. That said, we are happy to move it to the Supplementary Material if the editor deems it necessary.}
+
+\subsection*{R2.6 -- Figure 4 runtime discrepancy}
+
+\begin{RC}
+Figure 4: The figure makes it seem as if an OBDD analysis of a 400-tip tree is possible in three days. However, according to Table 1, the empirical OBDD analysis took 100 days. [...] Can this difference be explained by difference in diversification and fossil sampling rates (more augmented branches in the empirical analysis)?
+\end{RC}
+
+\response{Yes, the discrepancy is driven by the number of augmented branches. Cetaceans experienced a pronounced boom-and-bust history, requiring the MCMC to simulate many unobserved lineages. The calibration datasets, generated under a GBM prior that produces smoother rate variation, rarely exhibit such extreme dynamics and thus involve far fewer augmented branches, leading to shorter runtimes. Convergence on the cetacean dataset also required more iterations due to the larger augmented state space. We have clarified this in the revised manuscript.}
+
+\subsection*{R2.7 -- Figure 7 tick labels cut off}
+
+\begin{RC}
+Figure 7: The tick labels on the color axes are cut off for some panels, which is a bit distracting. Please try to un-crop the tick labels.
+\end{RC}
+
+\response{Done. We have increased the right margin of the tree panels so that the colorbar tick labels are no longer cropped.}
+
+\subsection*{R2.8 -- Figure 7 linked color maps}
+
+\begin{RC}
+If the color maps within each row would be linked, it would be easier to compare for example column 1 to the other columns, and the figure would be more pedagogic in terms of answering questions such as "what is the impact of including occurrence/phylogenetic fossils?"
+\end{RC}
+
+\response{Done. The color scales are now shared within each row of Figure~8: all speciation rate panels use the same color range, and likewise for the extinction rate and net diversification panels.}
+
+\subsection*{R2.9 -- Speciation event: rate inheritance}
+
+\begin{RC}
+Lines 138--139: Consider saying what happens at a speciation event. I assume that the speciation and extinction rates on the child branches are inherited from the parent.
+\end{RC}
+
+\response{Done. We now explicitly state that at each speciation event, both daughter lineages inherit the speciation and extinction rates of the parent lineage.}
+
+\subsection*{R2.10 -- Time discretization $\delta t$}
+
+\begin{RC}
+Lines 167--168: How is the size of the time discretization chosen or set?
+\end{RC}
+
+\response{Thank you for raising this. We have added a parenthetical in the Methods stating that $\delta t$ is set to $10^{-3}$~Myr in all our analyses.}
+
+\subsection*{R2.11 -- Stem branch phrasing}
+
+\begin{RC}
+Lines 274--275: The wording of the sentence makes it sound as if the stem branch, meaning for example the time of MRCA is being inferred. My understanding is that the reconstructed phylogeny is fixed and that the diversification rates are inferred. Consider re-phrasing to say "diversification rates on the stem branch can be inferred" or similar.
+\end{RC}
+
+\response{We have rephrased to clarify that what we meant is that we can use a fixed tree that includes a stem branch even for trees without coded fossils, because the length of this stem branch can be inferred using uncoded occurrences.}
+
+\subsection*{R2.12 -- Appendix: clarify "branch b"}
+
+\begin{RC}
+Appendix A, line 680: It is not completely clear to me whether "branch b" is the "reconstructed-tree branch" or "augmented branch". [...] It might be an idea to use a bit more explicit terminology when referring to the branch.
+\end{RC}
+
+\response{Thank you for flagging this. "Branch $b$" refers to a reconstructed-tree branch; we have updated the terminology in Appendix~A to state this explicitly.}
+
+\subsection*{R2.13 -- Bibliography errors}
+
+\begin{RC}
+There are many errors in the main text publication list, missing issue/volume/page numbers, inconsistent use of links, and more. This should be looked after more carefully.
+\end{RC}
+
+\response{We apologize for the many bibliographic errors. We have carefully reviewed the entire reference list and corrected all entries: missing volume and page numbers have been added, raw metadata artifacts from Zotero exports (e.g.\ Google Books IDs, \texttt{eprint} fields, bioRxiv section tags) have been removed, and preprints are now formatted consistently. We thank the reviewer for flagging this issue.}
+
+\subsection*{R2.14 -- Custom tree plots}
+
+\begin{RC}
+Not a criticism but I am curious: I see that in Figure 7 the diversification rates change along the branch, which is to my knowledge not possible to plot using ggtree. Did the authors implement their own tree plots from scratch?
+\end{RC}
+
+\response{Indeed, these tree plots are generated by our Tapestree.jl package, which includes custom plotting functions for augmented trees with branch-specific rate gradients.}
+
+
+\bigskip\noindent\rule{\linewidth}{0.8pt}\bigskip
+
+%% ============================================================
+\section*{Reviewer 3 (Dr.\ Peter Wagner)}
+%% ============================================================
+
+We thank Dr.\ Wagner for his thorough review and for drawing our attention to relevant paleobiological literature. We address his major themes and specific comments below.
+
+% --- R3 Major Theme 1 ---
+\subsection*{R3.1 -- Sampling model and sampling distributions}
+
+The reviewer raises two distinct points regarding the sampling model: (1)~that sampling is fundamentally binomial rather than Poisson, and (2)~that a lognormal distribution of sampling rates among taxa is better supported empirically than a Gamma distribution.
+
+\subsubsection*{Poisson vs.\ binomial sampling}
+
+The reviewer notes that our occurrence sampling equation is "for all intents and purposes, identical" to the TRiPS method (Starrfelt \& Liow 2016), and is a variant of Huelsenbeck \& Rannala's (1997) topology likelihood given stratigraphic data. He points out that sampling is fundamentally binomial (dependent on the number of available sites/collections), not Poisson.
+
+\response{The Poisson sampling assumption in our Equation~1 is indeed shared with TRiPS (Starrfelt \& Liow 2016), and we thank the reviewer for drawing our attention to the connection with Huelsenbeck \& Rannala (1997); we now cite both in the revised manuscript. That said, we think "identical" overstates the similarity. TRiPS is a standalone method that estimates true species richness from occurrence counts, without phylogenetic information. Our equation serves a different purpose: it is one component of a full birth-death phylogenetic model, where the occurrence likelihood constrains the augmented tree and diversification rates.}
+
+\response{On the question of whether sampling is fundamentally binomial rather than Poisson: we note that TRiPS itself is built on a Poisson model (Eq.~2.1 in Starrfelt \& Liow 2016), and the binomial detection probability in TRiPS (its Eq.~2.4) is derived \emph{from} the Poisson, not assumed independently. In our model, the expected number of occurrences in an interval is $\omega L_i N_i$: more co-existing lineages ($N_i$) for a longer duration ($L_i$) means more biological opportunity to leave fossil traces. Variation in collection effort (the reviewer's example of Interval~A with 100~collections and Interval~B with 50) is a separate source of heterogeneity that our model handles through piecewise~$\omega$ across time periods, analogously to TRiPS estimating a separate $\lambda_t$ for each geological stage. We have added a sentence in the Methods acknowledging the connection to TRiPS and Huelsenbeck \& Rannala (1997).}
+
+\subsubsection*{Gamma vs.\ lognormal distribution for rate heterogeneity among taxa}
+
+The reviewer argues that a lognormal distribution of sampling rates among taxa is better supported empirically than a Gamma distribution (Wagner \& Marcot 2013; Foote 2016).
+
+\response{We chose the Gamma distribution because it is conjugate to the Poisson likelihood, enabling Gibbs sampling and substantially faster MCMC, which is critical given the already high computational cost of the OBDD model. In practice, the Gamma and lognormal are both right-skewed unimodal distributions on the positive reals and closely approximate each other in the relevant parameter ranges, so the practical difference is expected to be small. We also note that in an ongoing project on Cenozoic planktonic foraminifera, a Gamma distribution provided a substantially better fit to the empirical distribution of fossil sampling rates than a lognormal.}
+
+% --- R3 Major Theme 2 ---
+\subsection*{R3.2 -- Coded vs.\ uncoded taxa: separate sampling distributions}
+
+The reviewer challenges our use of separate sampling rates for coded fossils vs.\ uncoded occurrences. His Figure 1 shows the distribution of PBDB occurrences for coded and uncoded cetacean OTUs, demonstrating that "the uncoded taxa are more apt to come from those known from fewer collections. This does not represent a separate sampling distribution: there are no taphonomic differences between these taxa and others." He argues that the distinction reflects human coding effort (well-sampled species get coded first) rather than different biological or taphonomic sampling regimes.
+
+\response{We appreciate the reviewer's detailed argument on this point, including his Figure~1 showing the distribution of coded and uncoded cetacean OTUs by number of collections. This critique prompted us to look more carefully at what our parametrization actually assumes, and we believe the concern can be addressed through a simple reparametrization.}
+
+\response{In our model, for a lineage of length $L$ in a given time period, coded fossils arise as a Poisson process with rate $\psi$ and uncoded occurrences as an independent Poisson process with rate $\omega$. That is, $F \sim \text{Pois}(\psi L)$ and $O \sim \text{Pois}(\omega L)$. Now define:
+\begin{itemize}[nosep]
+    \item a \emph{total fossil sampling rate}: $\varphi = \psi + \omega$,
+    \item a \emph{coding probability}: $p = \psi / (\psi + \omega)$.
+\end{itemize}
+By a standard property of independent Poisson variables, the total number of finds $K = F + O$ follows:
+\[
+K = F + O \sim \text{Pois}(\varphi L),
+\]
+and, conditional on the total $K = k$, the number of coded fossils is Binomial:
+\[
+F \mid K = k \;\sim\; \text{Binom}\!\left(k,\; \frac{\psi}{\psi + \omega}\right) = \text{Binom}(k, \, p).
+\]
+This reparametrization is exact: the two formulations yield identical likelihoods. So our model with separate $\psi$ and $\omega$ is strictly equivalent to a model with a single total sampling rate~$\varphi$ and a probability~$p$ that each find is coded.}
+
+\response{Put differently, our model assumes a single fossil discovery process with rate~$\varphi$, which subsumes all factors affecting fossil recovery (including the number of fossiliferous collections, preservation, and sampling effort), and each find is then coded or not with probability~$p$ (a Binomial draw). Our model does \emph{not} assume that coded and uncoded fossils come from different taphonomic or environmental sampling regimes; the distinction reflects coding effort, not a separate sampling distribution.}
+
+\response{Where our model goes slightly further is that $\psi$ and $\omega$ (and hence $\varphi$ and $p$) can vary in a piecewise manner across user-defined time periods. In other words, we do not force the coding probability~$p$ to be the same across all geological periods. In some periods, the proportion of fossils that get coded may be higher, for instance because better preservation yields more complete specimens suitable for morphological study, or because certain intervals have received more attention from the paleontological community.}
+
+\response{We agree with the reviewer that for cetaceans specifically, the coding probability~$p$ likely does not vary much across time periods, given the extensive and relatively uniform taxonomic effort on this group. We have revised the manuscript to make clear that our parametrization does not imply separate sampling processes for coded and uncoded fossils, and we acknowledge this point in the Discussion. That said, the OBDD model is designed as a general framework for diverse clades, not only cetaceans, and we cannot assume that the coding probability is constant across time periods for all groups this model could be applied to. By not forcing $p$ to be constant, we let the data speak to whether the coding probability varies, rather than imposing an assumption that may not hold universally. The model can recover a constant~$p$ if the data support it, but is not forced to assume one.}
+
+% --- R3 Major Theme 3 ---
+\subsection*{R3.3 -- Expected sampling and taphonomic controls}
+
+The reviewer emphasizes that expected sampling can and should be assessed in advance using taphonomic controls---localities where the focal clade \emph{could} have been found but was not (Bottjer \& Jablonski 1988; Alroy et al.\ 2001). He provides a figure (his Figure 2) showing the number of relevant fossiliferous collections over time from the PBDB, with two levels of taphonomic control (marine tetrapods and marine vertebrates). He argues that this provides direct information about expected sampling rates, reduces the need for complex model-based estimation, and that "a clade's `entire fossil record' is not just [...] the localities yielding [the clade], it includes the localities that \emph{could} have yielded [fossils] but failed to do so."
+
+\response{This is a valuable point. Taphonomic controls (e.g., the number of collections that could have yielded the focal clade but did not) provide direct, independent information about expected sampling intensity over time. Incorporating such data into the sampling rate priors would be an improvement, and we agree that this is a promising direction for future work.}
+
+\response{That said, to our knowledge no fossilized birth-death model currently incorporates taphonomic control data. This is a limitation shared by the entire FBD modeling framework, not specific to our approach. Developing the methodology to integrate collection-level data into birth-death models would be a substantial contribution in its own right, and we believe it goes beyond the scope of the present paper.}
+
+\response{We also take the reviewer's point that a clade's "entire fossil record" includes localities where the clade could have been found but was not. Our use of the phrase "entire fossil record" in the manuscript was too strong: what we use is the entire \emph{observed} fossil record (coded fossils and uncoded occurrences), not the full set of sampling opportunities. We have toned down this language in the revised manuscript.}
+
+% --- R3 Major Theme 4 ---
+\subsection*{R3.4 -- Phylogenies are not the only way to infer missing taxa}
+
+The reviewer notes that other birth-death-sampling methods---such as three-timers (Alroy 2008), capture-mark-recapture (Connolly \& Miller 2001), forward \& reverse survivorship (Foote 2001), and TRiPS (Starrfelt \& Liow 2016)---also explicitly account for unsampled lineages when estimating richness or diversification rates. He also points out an important limitation of phylogenetic approaches: they infer unsampled lineages "in one temporal direction only," meaning they can account for "Signor-Lipps lineages" (ghost lineages extending ranges backward in time) but not unsampled dead-end lineages appearing \emph{after} sampled taxa.
+
+\response{We thank the reviewer for highlighting these methods. We have added citations to the three-timers, capture-mark-recapture, forward and reverse survivorship, and TRiPS approaches in the revised Discussion, to acknowledge that phylogenetic methods are not the only way to account for unsampled lineages.}
+
+\response{However, we respectfully disagree that our approach can only infer unsampled lineages in one temporal direction. Ghost lineages (branches implied by the tree topology between divergence points) are accounted for by the phylogenetic reconstruction itself. On top of this, the data augmentation procedure simulates both Signor-Lipps extensions (extending known ranges forward in time) and entirely unsampled lineages that originate, diversify, and go extinct without being observed. These dead-end lineages are visible in the new illustrative figure (the new Fig.~2, added in response to R1.2), which shows augmented branches that have no connection to any observed fossil or extant taxon.}
+
+% --- R3 Major Theme 5 ---
+\subsection*{R3.5 -- Insufficient engagement with the paleobiological literature}
+
+The reviewer identifies multiple instances where our paper does not credit prior paleobiological work. Key examples include:
+\begin{itemize}[nosep]
+    \item Rate heterogeneity in diversification has been modeled in paleontology for over 40 years (e.g., Sepkoski 1981).
+    \item Logistic diversification with richness-dependent origination was shown for mammals by Alroy (1996), predating similar findings by Quintero et al.
+    \item The observation that "diversity expansions are fueled by bursts of rapid speciation, while slowdowns and declines are primarily governed by extinction rates" was first demonstrated by Gilinsky \& Bambach (1987).
+    \item The recognition that fossil sampling varies over time predates Dominici et al.\ (2020) by decades (Raup 1975).
+\end{itemize}
+
+\response{We thank the reviewer for these references and apologize for the omissions. We have added all four citations in the revised manuscript: Sepkoski (1981) to acknowledge the long history of heterogeneous diversification modeling in paleontology, Alroy (1996) alongside Quintero et al.\ (2024), Gilinsky \& Bambach (1987) alongside Quintero et al.\ (2025), and Raup (1975) alongside Dominici et al.\ (2020) (see also R3.13). We also clarified that our introductory paragraph on rate heterogeneity refers specifically to phylogenetic models.}
+
+% --- R3 Major Theme 6 ---
+\subsection*{R3.6 -- Why use whales?}
+
+The reviewer asks that we explicitly explain why cetaceans are a good model group, noting that they have one of the most complete fossil records in the PBDB thanks largely to the efforts of Mark Uhen, with extensive taxonomic curation. He recommends citing Uhen et al.\ (2023) for the PBDB and acknowledging the top data contributors.
+
+\response{We have added a sentence in the Case Study section explaining why cetaceans are a good model group for our analyses. We have also added the citation to Uhen et al.\ (2023) for the PBDB (see also R3.17). We acknowledge the top PBDB contributors (\todo) and will obtain a publication number upon acceptance.}
+
+% --- R3 Minor Comments ---
+\subsection*{R3.7 -- Terminology: "phylogenetic fossil" vs "occurrence"}
+
+The reviewer finds our terminology "awful and confusing," noting that "a fossil occurrence means that a species is known from a fossil at a fossiliferous locality. That is the way we've used the term for decades." He suggests using "coded taxa" and "uncoded taxa" instead.
+
+\response{We agree and have adopted the terms "coded fossils" and "uncoded occurrences" throughout the manuscript (see our response to the Associate Editor).}
+
+\subsection*{R3.8 -- "Incidence" synonymous with "occurrence" (p.\ 3, l.\ 52)}
+
+The reviewer notes that "incidence" is synonymous with "occurrence" in macroecology and paleobiology, and that an occurrence also carries spatial and assemblage information, not just a time.
+
+\response{We have added a parenthetical noting that incidence data in phylodynamics are analogous to fossil occurrences in paleobiology. We acknowledge that fossil occurrences carry spatial and assemblage information that our model does not currently exploit.}
+
+\subsection*{R3.9 -- Rate heterogeneity in paleontology (p.\ 4, l.\ 71--73)}
+
+Regarding our statement about progress in developing diversification models with rate heterogeneity, the reviewer notes: "maybe the authors mean in the context of phylogenies: but with general data, paleontologists have been using models that demonstrate rate heterogeneity for over 40 years" (e.g., Sepkoski 1981).
+
+\response{Addressed in R3.5. We have added a sentence acknowledging the long history of heterogeneous diversification modeling in paleontology, with Sepkoski (1981) as a key reference, and clarified that our paragraph focuses on phylogenetic models specifically.}
+
+\subsection*{R3.10 -- Logistic diversification (p.\ 5, l.\ 96--100)}
+
+The reviewer argues that the pattern described for Quintero et al.\ (2024) was "originally shown for mammals 30 years ago" by Alroy (1996) and that this constitutes logistic diversification, a concept widely discussed in paleontological literature.
+
+\response{Addressed in R3.5. We have added a citation to Alroy (1996) alongside the reference to Quintero et al.\ (2024).}
+
+\subsection*{R3.11 -- Slowdowns governed by extinction (p.\ 5, l.\ 102--105)}
+
+The reviewer points out that the finding attributed to Quintero et al.\ (2025) about diversity expansions driven by speciation bursts and declines governed by extinction "was first demonstrated nearly 40 years ago by Gilinsky \& Bambach (1987)."
+
+\response{Addressed in R3.5. We have added a citation to Gilinsky \& Bambach (1987) alongside the reference to Quintero et al.\ (2025).}
+
+\subsection*{R3.12 -- Single-specimen morphospecies (p.\ 5, l.\ 106--108)}
+
+Regarding our statement that "morphospecies are often only represented by a single described specimen," the reviewer notes that nearly 50\% of OTUs in the whale matrices include polymorphic characters (requiring 2+ specimens). He asks that we "phrase this in a way to make it clear that single-specimen taxa are not the overwhelming majority of analyzed taxa in most phylogenetic studies."
+
+\response{We have rephrased. The point we intended to make is that paleontological databases typically include only one entry per morphospecies, not that most morphospecies are known from a single specimen. The revised text now reads: "each morphospecies is typically represented by a single entry, even though many are known from multiple specimens."}
+
+\subsection*{R3.13 -- Variable sampling rates (p.\ 7, l.\ 145--146)}
+
+Our citation of Dominici et al.\ (2020) for the recognition that fossil sampling varies over time is criticized: "did it really take us until 2020 to realize that?" The reviewer points to Raup (1975) as the earliest reference and notes that the PBDB was founded in 1998 specifically to address temporal sampling heterogeneities.
+
+\response{We agree, and we have added the citation to Raup (1975) alongside Dominici et al.\ (2020).}
+
+\subsection*{R3.14 -- "Complete phylogeny" (p.\ 8, l.\ 158--159)}
+
+Regarding our phrase "a complete phylogeny, combining the reconstructed tree and the augmented branches," the reviewer writes: "I know that I am getting repetitive, but this `complete' phylogeny still omits many branches: `Signor-Lipps' lineages and completely unsampled non-ancestral taxa all are excluded. So, it really is not complete at all."
+
+\response{We understand the concern about the terminology. In fact, both types of missing lineages the reviewer mentions are accounted for: ghost lineages are implied by the phylogenetic reconstruction itself, while the data augmentation procedure adds Signor-Lipps extensions and entirely unsampled lineages that originate, diversify, and go extinct without leaving any observed trace (see the new Fig.~2 and our response to R3.4). Each augmented tree therefore represents one possible realization of the full diversification history, including unobserved lineages. The term "complete phylogeny" is standard in the phylogenetic diversification literature, referring to the full tree including unobserved lineages, as opposed to the reconstructed (observed) tree.}
+
+\subsection*{R3.15 -- Likelihood vs probability (p.\ 9, l.\ 185--186)}
+
+\begin{RC}
+It is the tree and the sampling rates that have likelihoods, not the data. Thus, it should state "The probability of the whole occurrence dataset\ldots" or "The likelihood of the tree and sampling rates".
+\end{RC}
+
+\response{The reviewer is right. We now write "the probability of the [uncoded] occurrence data $\Omega$\ldots"}
+
+\subsection*{R3.16 -- 405 fossils (p.\ 12, l.\ 253--255)}
+
+The reviewer clarifies that our "405 fossils (representing distinct morphotaxa)" should read "405 fossil taxa representing distinct morphotaxa (or morphotypes)," since these almost certainly represent many more individual fossils.
+
+\response{Good point. We have rephrased to "405 coded fossil taxa, each representing a distinct morphotaxon."}
+
+\subsection*{R3.17 -- PBDB citation (p.\ 12, l.\ 259--260)}
+
+The reviewer states that the appropriate reference for the PBDB is Uhen et al.\ (2023, \textit{PaleoBios} 40:1), which outlines how to use the PBDB. He also recommends citing the top 10 data contributors and obtaining a PBDB publication number.
+
+\response{We have added the citation to Uhen et al.\ (2023). We acknowledge the top PBDB contributors and will obtain a publication number upon acceptance.}
+
+\subsection*{R3.18 -- "Diversification models" (p.\ 12, l.\ 264)}
+
+The reviewer argues that our eight fitted models are "not really diversification models" in the classical sense, and that true diversification models would include exponential vs.\ logistic vs.\ hierarchical diversification patterns, alternative extinction peaks, etc.
+
+\response{We respectfully disagree on the definition. In the phylogenetic diversification literature, "diversification models" refers broadly to stochastic models of speciation and extinction used to study how lineages accumulate over time (see e.g.\ Morlon et al.\ 2024, \textit{Annu.\ Rev.\ Ecol.\ Evol.\ Syst.}\ 55, for a recent review). Our eight models (BD, BDD, FBD, OBD, FBDD, OBDD, and their variants) are all birth-death models that differ in the types of data they incorporate and whether they allow rate heterogeneity. We acknowledge that the paleontological tradition uses "diversification models" to refer to specific hypotheses about diversity dynamics (logistic, exponential, etc.), and that this terminological difference may cause confusion across communities.}
+
+\subsection*{R3.19 -- Epoch names and intervals (p.\ 13, l.\ 279--282)}
+
+The reviewer asks that epoch names be rephrased: "The Rupelian is equivalent to the Early Oligocene. However, the Aquitanian and the Messinian are only parts of the Early Miocene and Late Miocene, respectively. So, write `Aquitanian (Early Miocene) and Messinian (Late Miocene)' as more of your readers will know when the Miocene is than when the Aquitanian or Messinian."
+
+\response{Done. We have rephrased to "Rupelian (Early Oligocene), Aquitanian (Early Miocene), and Messinian (Late Miocene)."}
+
+\subsection*{R3.20 -- Occurrence rates higher "as expected" (p.\ 19, l.\ 361)}
+
+The reviewer argues that higher uncoded occurrence rates are not a biological expectation but merely a consequence of coding well-sampled species first, reinforcing that there should not be two separate sampling rates.
+
+\response{We agree that the higher uncoded occurrence rate does not reflect a biological difference in sampling regimes. As discussed in R3.2, our parametrization with separate rates $\psi$ and $\omega$ is strictly equivalent to a single total sampling rate $\varphi = \psi + \omega$ with a Binomial coding probability $p = \psi/(\psi+\omega)$. The fact that $\omega > \psi$ simply means that $p < 0.5$, i.e., most fossil finds in a given interval are not coded into a phylogenetic matrix.}
+
+\subsection*{R3.21 -- Rupelian date (p.\ 19, l.\ 365)}
+
+The reviewer questions our Rupelian end date of 28.1 Ma, noting that the Geologic Time Scale 2020 (Gradstein et al.) gives 33.9--27.29 Ma for the Rupelian.
+
+\response{Thank you, corrected to 33.9--27.3~Ma following Gradstein et al.\ (2020).}
+
+\subsection*{R3.22 -- Alternative occurrences: teeth, scales, etc.\ (p.\ 23, l.\ 408--410)}
+
+The reviewer comments on our list of alternative occurrence types ("teeth, scales, plant organs [...], biochemical proxies, ichnofossils (trace fossils), coprolites"):
+
+\begin{RC}
+Teeth are not a great example, at least for mammals, as they figure very heavily in phylogenetic analyses of mammals. Indeed, mammal teeth are much more diagnostic of species and genera than are post-cranial material: whereas closely related mammal species (e.g., humans and chimps) can be distinguished by teeth (even if they are very similar!), variation in post-cranial skeletons often reflects only allometry. [...] For groups such as dinosaurs, teeth diagnose much more general groups: they'll tell us that a family was present, but not whether more than one species of that family was present.
+\end{RC}
+
+\begin{RC}
+We run into different issues with biochemical proxies. These rarely are closely tied to particular taxa. [...] Trace fossils and coprolites run into similar problems as non-mammalian teeth: they diagnose very large groups phylogenetically, and they might show you that a general group was present, but probably a group more general than the clade being analyzed.
+\end{RC}
+
+\response{We agree that teeth are a poor example for mammals, where they are among the most phylogenetically informative remains. Our example was motivated by groups such as sharks, where isolated teeth are abundant in the fossil record but often cannot be assigned to species-level taxonomy. We have clarified this in the revised manuscript. We also acknowledge the reviewer's points about biochemical proxies and trace fossils: these data types come with significant limitations in taxonomic resolution. Nevertheless, we believe it is worth mentioning these possibilities for researchers working on specific clades where such remains can be unambiguously attributed to the focal group, even if they cannot be placed in the phylogeny. We have tempered the language accordingly.}
+
+\subsection*{R3.23 -- Phylogenetic framework not unique for unsampled lineages (p.\ 23, l.\ 419--421)}
+
+The reviewer reiterates that other BDS methods also infer unsampled lineages, and are moreover agnostic about whether unsampled lineages are older or younger than sampled taxa.
+
+\response{We agree, and we have revised the Discussion to acknowledge these non-phylogenetic approaches (see R3.4). The revised text no longer implies that phylogenetic methods are the only way to account for unsampled lineages.}
+
+\subsection*{R3.24 -- Heterogeneous rates (p.\ 23, l.\ 424)}
+
+Regarding our section heading "Heterogeneous rates give us a refined view," the reviewer notes: "paleontologists have known this for decades."
+
+\response{We agree that paleontologists have long recognized the importance of rate heterogeneity (see also R3.5 and R3.9). Our section heading refers specifically to the contribution of incorporating rate heterogeneity in \emph{phylogenetic} diversification models, where it has been less common. We have revised the heading to make this clearer.}
+
+\subsection*{R3.25 -- Declining net-diversification and logistic diversification (p.\ 24, l.\ 435--437)}
+
+The reviewer argues that our observed pattern of declining net-diversification rates is "almost certainly picking up logistic diversification" and recommends engaging with the literature on diversity-dependent models.
+
+\response{Logistic diversification is indeed a plausible explanation for the observed decline in net-diversification rates. However, the goal of the BDD model family is precisely to infer rate trajectories without presupposing a specific macroevolutionary mechanism such as diversity dependence. The inferred patterns can then be used to generate hypotheses, which can be tested with models specifically designed for that purpose, including diversity-dependent models (e.g., Etienne et al.\ 2012; Laudanno et al.\ 2021). We already make this point in the Discussion (see the end of the "Incorporating rate heterogeneity" section), and we have added a reference to the logistic diversification literature (Alroy 1996; see also R3.10).}
+
+\subsection*{R3.26 -- Offer to discuss}
+
+The reviewer offers to discuss the use of stratigraphic databases for refining PBDB occurrences and notes that while the review may come across as negative, the underlying goal is to encourage engagement between phylogenetic and paleobiological approaches.
+
+\response{We appreciate the reviewer's thoroughness and his effort to bridge the phylogenetic and paleobiological communities. His review has substantially improved the manuscript. We hope that through the appeal process we will have the opportunity to get his opinion on our responses and revised manuscript.}
+
+\end{document}

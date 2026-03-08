@@ -1,0 +1,216 @@
+---
+title: "Estimation error vs trend parameter (R2.3)"
+output:
+  pdf_document:
+    fig_height: 5
+    fig_width: 10
+    toc: yes
+  html_notebook:
+    code_folding: hide
+---
+
+Supplementary analyses addressing Reviewer 2, comment R2.3: estimation error as
+a function of the trend parameter.
+
+Uses the existing MCMC parameter traces from the calibration study (500 datasets).
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+# Add user library for R 4.4 packages if running under R 4.5
+user_lib <- paste0(Sys.getenv("HOME"), "/Library/R/arm64/4.4/library")
+if (dir.exists(user_lib)) .libPaths(c(user_lib, .libPaths()))
+```
+
+```{r}
+library(ape)
+library(dplyr)
+library(tidyr)
+library(tibble)
+library(ggplot2)
+library(patchwork)
+
+theme_set(theme_bw(base_size = 12))
+
+# Extant tips have labels starting with "t", fossils with "f"
+getExtant <- function(tree) tree$tip.label[grepl("^t", tree$tip.label)]
+```
+
+# Load calibration data
+
+```{r}
+bioclust_path <- paste0(Sys.getenv("HOME"), "/bioclust/INSANE_OBD/Calibration/")
+outputs_path  <- paste0(bioclust_path, "outputs/")
+datasets_path <- paste0(bioclust_path, "datasets_calibration/")
+
+dataset_nbs <- sort(as.integer(gsub("OBDD_SimulatedOBDD_dataset|_2000000iter.log", "",
+  list.files(outputs_path, pattern = "OBDD_SimulatedOBDD_dataset.*2000000iter.log"))))
+
+cat("Number of datasets:", length(dataset_nbs), "\n")
+
+parameter_labels <- c(
+  "λ"  = expression(lambda[0]),
+  "μ"  = expression(mu[0]),
+  "αλ" = expression(alpha[lambda]),
+  "αμ" = expression(alpha[mu]),
+  "σλ" = expression(sigma[lambda]),
+  "σμ" = expression(sigma[mu]),
+  "ψ1" = expression(psi[1]),
+  "ψ2" = expression(psi[2]),
+  "ω1" = expression(omega[1]),
+  "ω2" = expression(omega[2])
+)
+```
+
+```{r}
+# Column name mapping for trace files
+col_rename <- c(lambda_root = "λ", mu_root = "μ", alpha_lambda = "αλ", alpha_mu = "αμ",
+                sigma_lambda = "σλ", sigma_mu = "σμ", psi_1 = "ψ1", psi_2 = "ψ2",
+                omega_1 = "ω1", omega_2 = "ω2")
+trace_cols <- names(col_rename)
+
+parameters_OBDD <- do.call(rbind, lapply(dataset_nbs, function(dataset_nb) {
+  # Read only the 10 parameter columns from the trace file
+  trace_file <- paste0(outputs_path, "OBDD_SimulatedOBDD_dataset", dataset_nb, "_2000000iter.log")
+  trace <- data.table::fread(trace_file, select = trace_cols, data.table = FALSE)
+  names(trace) <- col_rename[names(trace)]
+
+  # Read true parameter values
+  params <- read.delim(paste0(datasets_path, "dataset", dataset_nb, "/params.csv")) %>%
+    gather(par, value) %>% slice(1:10)
+
+  # Tree info
+  tree_rec <- read.tree(paste0(datasets_path, "dataset", dataset_nb, "/tree_reconstructed.tre"))
+  ntips_rec <- Ntip(tree_rec)
+  ntips_ext <- sum(grepl("^t", tree_rec$tip.label))
+  nfossils  <- ntips_rec - ntips_ext
+
+  # Count occurrences without reading the full file
+  occ_file <- paste0(datasets_path, "dataset", dataset_nb, "/occurrences.csv")
+  nocc <- ifelse(file.info(occ_file)$size > 0,
+                 length(readLines(occ_file)), 0)
+
+  data.frame(
+    dataset_nb  = dataset_nb,
+    par         = params$par,
+    true_value  = params$value,
+    median_post = sapply(trace[params$par], median),
+    NMSE        = colMeans(t(t(trace[params$par]) - params$value)^2) / params$value^2,
+    ntips       = ntips_rec,
+    ntipsextant = ntips_ext,
+    nfossils    = nfossils,
+    nocc        = nocc,
+    row.names   = NULL
+  )
+}))
+
+parameters_OBDD$ParametersExpr <- factor(parameters_OBDD$par,
+  levels = names(parameter_labels), labels = parameter_labels)
+```
+
+
+# R2.3: Estimation error vs trend parameter
+
+The reviewer predicts that in models with a positive net-diversification trend
+($\alpha_\lambda > 0$ or $\alpha_\mu < 0$), the estimation error should be smaller
+because the tree is expected to be larger and more informative.
+
+```{r}
+# Join trend parameters to estimation errors
+trend_data <- parameters_OBDD %>%
+  left_join(
+    parameters_OBDD %>%
+      filter(par == "αλ") %>%
+      select(dataset_nb, true_αλ = true_value),
+    by = "dataset_nb"
+  ) %>%
+  left_join(
+    parameters_OBDD %>%
+      filter(par == "αμ") %>%
+      select(dataset_nb, true_αμ = true_value),
+    by = "dataset_nb"
+  ) %>%
+  mutate(net_div_trend = true_αλ - true_αμ)
+```
+
+## NMSE vs speciation trend $\alpha_\lambda$
+
+```{r fig.width=10, fig.height=5}
+p <- ggplot(trend_data %>% filter(!par %in% c("αλ", "αμ")),
+       aes(x = true_αλ, y = NMSE)) +
+  geom_point(alpha = 0.15, size = 1, color = "darkblue") +
+  geom_smooth(method = "loess", color = "dodgerblue3", linewidth = 0.5, se = TRUE,
+              fill = "dodgerblue3") +
+  scale_y_log10(name = "Normalized Mean Squared Error") +
+  scale_x_continuous(name = expression("True " * alpha[lambda] * " (speciation trend)")) +
+  facet_wrap(~ ParametersExpr, scales = "fixed", nrow = 2, labeller = label_parsed, dir = "v") +
+  labs(title = expression("Parameter estimation error vs speciation trend " * alpha[lambda])) +
+  theme(panel.grid = element_blank(), strip.text = element_text(size = 10))
+p
+
+ggsave("Images/OBDD_NMSE_vs_alpha_lambda.pdf", p, width = 10, height = 5)
+```
+
+## NMSE vs net diversification trend $\alpha_\lambda - \alpha_\mu$
+
+```{r fig.width=10, fig.height=5}
+p <- ggplot(trend_data %>% filter(!par %in% c("αλ", "αμ")),
+       aes(x = net_div_trend, y = NMSE)) +
+  geom_point(alpha = 0.15, size = 1, color = "darkorange3") +
+  geom_smooth(method = "loess", color = "darkorange3", linewidth = 0.5, se = TRUE,
+              fill = "darkorange3") +
+  scale_y_log10(name = "Normalized Mean Squared Error") +
+  scale_x_continuous(name = expression("Net diversification trend (" * alpha[lambda] - alpha[mu] * ")")) +
+  facet_wrap(~ ParametersExpr, scales = "fixed", nrow = 2, labeller = label_parsed, dir = "v") +
+  labs(title = "Parameter estimation error vs net diversification trend") +
+  theme(panel.grid = element_blank(), strip.text = element_text(size = 10))
+p
+
+ggsave("Images/OBDD_NMSE_vs_net_div_trend.pdf", p, width = 10, height = 5)
+```
+
+## NMSE vs extinction trend $\alpha_\mu$
+
+```{r fig.width=10, fig.height=5}
+p <- ggplot(trend_data %>% filter(!par %in% c("αλ", "αμ")),
+       aes(x = true_αμ, y = NMSE)) +
+  geom_point(alpha = 0.15, size = 1, color = "darkred") +
+  geom_smooth(method = "loess", color = "darkred", linewidth = 0.5, se = TRUE,
+              fill = "darkred") +
+  scale_y_log10(name = "Normalized Mean Squared Error") +
+  scale_x_continuous(name = expression("True " * alpha[mu] * " (extinction trend)")) +
+  facet_wrap(~ ParametersExpr, scales = "fixed", nrow = 2, labeller = label_parsed, dir = "v") +
+  labs(title = expression("Parameter estimation error vs extinction trend " * alpha[mu])) +
+  theme(panel.grid = element_blank(), strip.text = element_text(size = 10))
+p
+
+ggsave("Images/OBDD_NMSE_vs_alpha_mu.pdf", p, width = 10, height = 5)
+```
+
+## Tree size as confound
+
+The reviewer's hypothesis is that positive net-diversification trends produce larger
+trees, which provide more information. We verify this expected confound.
+
+```{r fig.width=10, fig.height=4}
+trend_unique <- trend_data %>%
+  filter(par == "λ") %>%
+  select(dataset_nb, ntips, true_αλ, true_αμ, net_div_trend)
+
+p1 <- ggplot(trend_unique, aes(x = true_αλ, y = ntips)) +
+  geom_point(alpha = 0.3, size = 1.5) +
+  geom_smooth(method = "loess", color = "steelblue") +
+  scale_y_log10(name = "Number of tips") +
+  labs(x = expression(alpha[lambda]),
+       title = expression("Tree size vs " * alpha[lambda]))
+
+p2 <- ggplot(trend_unique, aes(x = net_div_trend, y = ntips)) +
+  geom_point(alpha = 0.3, size = 1.5) +
+  geom_smooth(method = "loess", color = "steelblue") +
+  scale_y_log10(name = "Number of tips") +
+  labs(x = expression(alpha[lambda] - alpha[mu]),
+       title = "Tree size vs net diversification trend")
+
+p1 + p2
+
+ggsave("Images/OBDD_tree_size_vs_trend.pdf", p1 + p2, width = 10, height = 4)
+```

@@ -1,0 +1,426 @@
+\begin{thebibliography}{62}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\selectlanguage}[1]{\relax}
+\providecommand{\bibAnnoteFile}[1]{%
+  \IfFileExists{#1}{\begin{quotation}\noindent\textsc{Key:} #1\\
+  \textsc{Annotation:}\ \input{#1}\end{quotation}}{}}
+\providecommand{\bibAnnote}[2]{%
+  \begin{quotation}\noindent\textsc{Key:} #1\\
+  \textsc{Annotation:}\ #2\end{quotation}}
+
+\bibitem[{Alroy(1996)}]{alroy_constant_1996}
+Alroy, J. 1996. {\selectlanguage{en}Constant extinction, constrained
+  diversification, and uncoordinated stasis in {North} {American} mammals}.
+  Palaeogeography, Palaeoclimatology, Palaeoecology 127:285--311.
+\bibAnnoteFile{alroy_constant_1996}
+
+\bibitem[{Alroy(2008)}]{alroy_dynamics_2008}
+Alroy, J. 2008. {\selectlanguage{en}Dynamics of origination and extinction in
+  the marine fossil record}. Proceedings of the National Academy of Sciences
+  105:11536--11542.
+\bibAnnoteFile{alroy_dynamics_2008}
+
+\bibitem[{Andréoletti et~al.(2022)Andréoletti, Zwaans, Warnock,
+  Aguirre-Fernández, Barido-Sottani, Gupta, Stadler, and
+  Manceau}]{andreoletti_occurrence_2022}
+Andréoletti, J., A.~Zwaans, R.~C.~M. Warnock, G.~Aguirre-Fernández,
+  J.~Barido-Sottani, A.~Gupta, T.~Stadler, and M.~Manceau. 2022. The
+  {Occurrence} {Birth}–{Death} {Process} for {Combined}-{Evidence} {Analysis}
+  in {Macroevolution} and {Epidemiology}. Systematic Biology 71:1440--1452.
+\bibAnnoteFile{andreoletti_occurrence_2022}
+
+\bibitem[{Barido-Sottani and Morlon(2023)}]{barido-sottani_clads_2023}
+Barido-Sottani, J. and H.~Morlon. 2023. {\selectlanguage{en}The {ClaDS}
+  rate-heterogeneous birth–death prior for full phylogenetic inference in
+  {BEAST2}}. Systematic Biology 72:1180--1187.
+\bibAnnoteFile{barido-sottani_clads_2023}
+
+\bibitem[{Barido-Sottani and Morlon(2025)}]{barido-sottani_integrating_2025}
+Barido-Sottani, J. and H.~Morlon. 2025. {\selectlanguage{en}Integrating fossils
+  samples with heterogeneous diversification rates: a combined {Multi}-{Type}
+  {Fossilized} {Birth}-{Death} model}.
+\bibAnnoteFile{barido-sottani_integrating_2025}
+
+\bibitem[{Barido‐Sottani et~al.(2023)Barido‐Sottani, Pohle, De~Baets,
+  Murdock, and Warnock}]{baridosottani_putting_2023}
+Barido‐Sottani, J., A.~Pohle, K.~De~Baets, D.~Murdock, and R.~C.~M. Warnock.
+  2023. {\selectlanguage{en}Putting the {F} into {FBD} analysis: tree
+  constraints or morphological data?} Palaeontology 66:e12679.
+\bibAnnoteFile{baridosottani_putting_2023}
+
+\bibitem[{Bezanson et~al.(2017)Bezanson, Edelman, Karpinski, and
+  Shah}]{bezanson_julia_2017}
+Bezanson, J., A.~Edelman, S.~Karpinski, and V.~B. Shah. 2017.
+  {\selectlanguage{en}Julia: {A} {Fresh} {Approach} to {Numerical}
+  {Computing}}. SIAM Review 59:65--98.
+\bibAnnoteFile{bezanson_julia_2017}
+
+\bibitem[{Billaud et~al.(2019)Billaud, Moen, Parsons, and
+  Morlon}]{billaud_estimating_2019}
+Billaud, O., D.~S. Moen, T.~L. Parsons, and H.~Morlon. 2019.
+  {\selectlanguage{en}Estimating {Diversity} {Through} {Time} {Using}
+  {Molecular} {Phylogenies}: {Old} and {Species}-{Poor} {Frog} {Families} are
+  the {Remnants} of a {Diverse} {Past}}. Systematic Biology 69:589--606.
+\bibAnnoteFile{billaud_estimating_2019}
+
+\bibitem[{Bouckaert et~al.(2019)Bouckaert, Vaughan, Barido-Sottani, Duchêne,
+  Fourment, Gavryushkina, Heled, Jones, Kühnert, De~Maio, Matschiner, Mendes,
+  Müller, Ogilvie, Du~Plessis, Popinga, Rambaut, Rasmussen, Siveroni, Suchard,
+  Wu, Xie, Zhang, Stadler, and Drummond}]{bouckaert_beast_2019}
+Bouckaert, R., T.~G. Vaughan, J.~Barido-Sottani, S.~Duchêne, M.~Fourment,
+  A.~Gavryushkina, J.~Heled, G.~Jones, D.~Kühnert, N.~De~Maio, M.~Matschiner,
+  F.~K. Mendes, N.~F. Müller, H.~A. Ogilvie, L.~Du~Plessis, A.~Popinga,
+  A.~Rambaut, D.~Rasmussen, I.~Siveroni, M.~A. Suchard, C.-H. Wu, D.~Xie,
+  C.~Zhang, T.~Stadler, and A.~J. Drummond. 2019. {\selectlanguage{en}{BEAST}
+  2.5: {An} advanced software platform for {Bayesian} evolutionary analysis}.
+  PLOS Computational Biology 15:e1006650.
+\bibAnnoteFile{bouckaert_beast_2019}
+
+\bibitem[{Budd and Mann(2025)}]{budd_evolutionary_2025}
+Budd, G.~E. and R.~P. Mann. 2025. Evolutionary {Tempo}, {Supertaxa}, and
+  {Living} {Fossils}. Systematic Biology Page~syaf020.
+\bibAnnoteFile{budd_evolutionary_2025}
+
+\bibitem[{Caetano et~al.(2018)Caetano, O'Meara, and
+  Beaulieu}]{caetano_hidden_2018}
+Caetano, D.~S., B.~C. O'Meara, and J.~M. Beaulieu. 2018.
+  {\selectlanguage{en}Hidden state models improve state-dependent
+  diversification approaches, including biogeographical models: {HMM} {AND}
+  {THE} {ADEQUACY} {OF} {SSE} {MODELS}}. Evolution 72:2308--2324.
+\bibAnnoteFile{caetano_hidden_2018}
+
+\bibitem[{Chabrol et~al.(2025)Chabrol, Morlon, and
+  Barido-Sottani}]{chabrol_fossilized_2025}
+Chabrol, N., H.~Morlon, and J.~Barido-Sottani. 2025. {\selectlanguage{en}The
+  {Fossilized} {Birth} {Death} {Process} with heterogeneous diversification
+  rates unravels the link between diversification and specialisation to a
+  carnivorous diet in {Nimravidae} ({Carnivoraformes})}.
+\bibAnnoteFile{chabrol_fossilized_2025}
+
+\bibitem[{Connolly and Miller(2001)}]{connolly_joint_2001}
+Connolly, S.~R. and A.~I. Miller. 2001. {\selectlanguage{en}Joint estimation of
+  sampling and turnover rates from fossil databases: capture-mark-recapture
+  methods revisited}. Paleobiology 27:751--767.
+\bibAnnoteFile{connolly_joint_2001}
+
+\bibitem[{do~Amaral et~al.(2018)do~Amaral, Amaral, Ewan~Fordyce, and
+  Moreno}]{do_amaral_historical_2018}
+do~Amaral, K.~B., A.~R. Amaral, R.~Ewan~Fordyce, and I.~B. Moreno. 2018.
+  {\selectlanguage{en}Historical {Biogeography} of {Delphininae} {Dolphins} and
+  {Related} {Taxa} ({Artiodactyla}: {Delphinidae})}. Journal of Mammalian
+  Evolution 25:241--259.
+\bibAnnoteFile{do_amaral_historical_2018}
+
+\bibitem[{Dominici et~al.(2020)Dominici, Danise, Cau, and
+  Freschi}]{dominici_awkward_2020}
+Dominici, S., S.~Danise, S.~Cau, and A.~Freschi. 2020. The awkward record of
+  fossil whales. Earth-Science Reviews 205.
+\bibAnnoteFile{dominici_awkward_2020}
+
+\bibitem[{Etienne et~al.(2011)Etienne, Haegeman, Stadler, Aze, Pearson, Purvis,
+  and Phillimore}]{etienne_diversity-dependence_2011}
+Etienne, R.~S., B.~Haegeman, T.~Stadler, T.~Aze, P.~N. Pearson, A.~Purvis, and
+  A.~B. Phillimore. 2011. Diversity-dependence brings molecular phylogenies
+  closer to agreement with the fossil record. Proceedings of the Royal Society
+  B: Biological Sciences 279:1300--1309.
+\bibAnnoteFile{etienne_diversity-dependence_2011}
+
+\bibitem[{Featherstone et~al.(2023)Featherstone, Duchene, and
+  Vaughan}]{featherstone_decoding_2023}
+Featherstone, L.~A., S.~Duchene, and T.~G. Vaughan. 2023. Decoding the
+  {Fundamental} {Drivers} of {Phylodynamic} {Inference}. Molecular Biology and
+  Evolution 40:msad132.
+\bibAnnoteFile{featherstone_decoding_2023}
+
+\bibitem[{Foote(2001)}]{foote_inferring_2001}
+Foote, M. 2001. {\selectlanguage{en}Inferring temporal patterns of
+  preservation, origination, and extinction from taxonomic survivorship
+  analysis}. Paleobiology 27:602--630.
+\bibAnnoteFile{foote_inferring_2001}
+
+\bibitem[{Gilinsky and Bambach(1987)}]{gilinsky_asymmetrical_1987}
+Gilinsky, N.~L. and R.~K. Bambach. 1987. {\selectlanguage{en}Asymmetrical
+  patterns of origination and extinction in higher taxa.} Paleobiology
+  13:427--445.
+\bibAnnoteFile{gilinsky_asymmetrical_1987}
+
+\bibitem[{Gowans et~al.(2007)Gowans, Würsig, and
+  Karczmarski}]{gowans_social_2007}
+Gowans, S., B.~Würsig, and L.~Karczmarski. 2007. The {Social} {Structure} and
+  {Strategies} of {Delphinids}: {Predictions} {Based} on an {Ecological}
+  {Framework}. Pages~195--294 \emph{in} Advances in {Marine} {Biology} vol.~53.
+  Academic Press.
+\bibAnnoteFile{gowans_social_2007}
+
+\bibitem[{Gupta et~al.(2020)Gupta, Manceau, Vaughan, Khammash, and
+  Stadler}]{gupta_probability_2020}
+Gupta, A., M.~Manceau, T.~Vaughan, M.~Khammash, and T.~Stadler. 2020. The
+  probability distribution of the reconstructed phylogenetic tree with
+  occurrence data. Journal of Theoretical Biology 488:110115.
+\bibAnnoteFile{gupta_probability_2020}
+
+\bibitem[{Heath et~al.(2014)Heath, Huelsenbeck, and
+  Stadler}]{heath_fossilized_2014}
+Heath, T.~A., J.~P. Huelsenbeck, and T.~Stadler. 2014. The fossilized
+  birth-death process for coherent calibration of divergence-time estimates.
+  Proceedings of the National Academy of Sciences 111:E2957--E2966.
+\bibAnnoteFile{heath_fossilized_2014}
+
+\bibitem[{Huelsenbeck and Rannala(1997)}]{huelsenbeck_maximum_1997}
+Huelsenbeck, J.~P. and B.~Rannala. 1997. {\selectlanguage{en}Maximum likelihood
+  estimation of phylogeny using stratigraphic data}. Paleobiology 23:174--180.
+\bibAnnoteFile{huelsenbeck_maximum_1997}
+
+\bibitem[{Höhna et~al.(2016)Höhna, Landis, Heath, Boussau, Lartillot, Moore,
+  Huelsenbeck, and Ronquist}]{hohna_revbayes_2016}
+Höhna, S., M.~J. Landis, T.~A. Heath, B.~Boussau, N.~Lartillot, B.~R. Moore,
+  J.~P. Huelsenbeck, and F.~Ronquist. 2016. {\selectlanguage{eng}{RevBayes}:
+  {Bayesian} {Phylogenetic} {Inference} {Using} {Graphical} {Models} and an
+  {Interactive} {Model}-{Specification} {Language}}. Systematic Biology
+  65:726--736.
+\bibAnnoteFile{hohna_revbayes_2016}
+
+\bibitem[{Lloyd and Slater(2021)}]{lloyd_total-group_2021}
+Lloyd, G.~T. and G.~J. Slater. 2021. {\selectlanguage{en}A {Total}-{Group}
+  {Phylogenetic} {Metatree} for {Cetacea} and the {Importance} of {Fossil}
+  {Data} in {Diversification} {Analyses}}. Systematic Biology 70:922--939.
+\bibAnnoteFile{lloyd_total-group_2021}
+
+\bibitem[{MacPherson et~al.(2022)MacPherson, Louca, McLaughlin, Joy, and
+  Pennell}]{macpherson_unifying_2022}
+MacPherson, A., S.~Louca, A.~McLaughlin, J.~B. Joy, and M.~W. Pennell. 2022.
+  Unifying {Phylogenetic} {Birth}–{Death} {Models} in {Epidemiology} and
+  {Macroevolution}. Systematic Biology 71:172--189.
+\bibAnnoteFile{macpherson_unifying_2022}
+
+\bibitem[{Maddison et~al.(2007)Maddison, Midford, and
+  Otto}]{maddison_estimating_2007}
+Maddison, W.~P., P.~E. Midford, and S.~P. Otto. 2007.
+  {\selectlanguage{en}Estimating a {Binary} {Character}'s {Effect} on
+  {Speciation} and {Extinction}}. Systematic Biology 56:701--710.
+\bibAnnoteFile{maddison_estimating_2007}
+
+\bibitem[{Maliet et~al.(2019)Maliet, Hartig, and Morlon}]{maliet_model_2019}
+Maliet, O., F.~Hartig, and H.~Morlon. 2019. {\selectlanguage{en}A model with
+  many small shifts for estimating species-specific diversification rates}.
+  Nature Ecology \& Evolution 3:1086--1092.
+\bibAnnoteFile{maliet_model_2019}
+
+\bibitem[{Maliet and Morlon(2022)}]{maliet_fast_2022}
+Maliet, O. and H.~Morlon. 2022. {\selectlanguage{en}Fast and {Accurate}
+  {Estimation} of {Species}-{Specific} {Diversification} {Rates} {Using} {Data}
+  {Augmentation}}. Systematic Biology 71:353--366.
+\bibAnnoteFile{maliet_fast_2022}
+
+\bibitem[{Manceau et~al.(2021)Manceau, Gupta, Vaughan, and
+  Stadler}]{manceau_probability_2021}
+Manceau, M., A.~Gupta, T.~Vaughan, and T.~Stadler. 2021. The probability
+  distribution of the ancestral population size conditioned on the
+  reconstructed phylogenetic tree with occurrence data. Journal of Theoretical
+  Biology 509:110400.
+\bibAnnoteFile{manceau_probability_2021}
+
+\bibitem[{Marx and Fordyce(2015)}]{marx_baleen_2015}
+Marx, F.~G. and R.~E. Fordyce. 2015. Baleen boom and bust: a synthesis of
+  mysticete phylogeny, diversity and disparity. Royal Society Open Science
+  2:140434.
+\bibAnnoteFile{marx_baleen_2015}
+
+\bibitem[{Marx et~al.(2016)Marx, Lambert, and Uhen}]{marx_cetacean_2016}
+Marx, F.~G., O.~Lambert, and M.~D. Uhen. 2016. {\selectlanguage{en}Cetacean
+  {Paleobiology}}. John Wiley \& Sons.
+\bibAnnoteFile{marx_cetacean_2016}
+
+\bibitem[{Mazet et~al.(2023)Mazet, Morlon, Fabre, and
+  Condamine}]{mazet_estimating_2023}
+Mazet, N., H.~Morlon, P.~Fabre, and F.~L. Condamine. 2023.
+  {\selectlanguage{en}Estimating clade‐specific diversification rates and
+  palaeodiversity dynamics from reconstructed phylogenies}. Methods in Ecology
+  and Evolution 14:2575--2591.
+\bibAnnoteFile{mazet_estimating_2023}
+
+\bibitem[{McClennen(2024)}]{mcclennen_paleobiology_2024}
+McClennen, M. 2024. {\selectlanguage{en}Paleobiology {Database}}.
+\bibAnnoteFile{mcclennen_paleobiology_2024}
+
+\bibitem[{Mitchell et~al.(2019)Mitchell, Etienne, and
+  Rabosky}]{mitchell_inferring_2019}
+Mitchell, J.~S., R.~S. Etienne, and D.~L. Rabosky. 2019. Inferring
+  {Diversification} {Rate} {Variation} {From} {Phylogenies} {With} {Fossils}.
+  Systematic Biology 68:1--18.
+\bibAnnoteFile{mitchell_inferring_2019}
+
+\bibitem[{Morlon(2014)}]{morlon_phylogenetic_2014}
+Morlon, H. 2014. {\selectlanguage{en}Phylogenetic approaches for studying
+  diversification}. Ecology Letters 17:508--525.
+\bibAnnoteFile{morlon_phylogenetic_2014}
+
+\bibitem[{Morlon et~al.(2024)Morlon, Andréoletti, Barido-Sottani, Lambert,
+  Perez-Lamarque, Quintero, Senderov, and Veron}]{morlon_phylogenetic_2024}
+Morlon, H., J.~Andréoletti, J.~Barido-Sottani, S.~Lambert, B.~Perez-Lamarque,
+  I.~Quintero, V.~Senderov, and P.~Veron. 2024.
+  {\selectlanguage{en}Phylogenetic {Insights} into {Diversification}}. Annual
+  Review of Ecology, Evolution, and Systematics 55:1--21.
+\bibAnnoteFile{morlon_phylogenetic_2024}
+
+\bibitem[{Morlon et~al.(2011)Morlon, Parsons, and
+  Plotkin}]{morlon_reconciling_2011}
+Morlon, H., T.~L. Parsons, and J.~B. Plotkin. 2011. Reconciling molecular
+  phylogenies with the fossil record. Proceedings of the National Academy of
+  Sciences 108:16327--16332.
+\bibAnnoteFile{morlon_reconciling_2011}
+
+\bibitem[{Nee et~al.(1994)Nee, May, and Harvey}]{nee_reconstructed_1994}
+Nee, S., R.~M. May, and P.~H. Harvey. 1994. The reconstructed evolutionary
+  process. Philosophical Transactions of the Royal Society of London. Series B:
+  Biological Sciences 344:305--311.
+\bibAnnoteFile{nee_reconstructed_1994}
+
+\bibitem[{Plummer et~al.(2006)Plummer, Best, Cowles, and
+  Vines}]{plummer_coda_2006}
+Plummer, M., N.~Best, K.~Cowles, and K.~Vines. 2006. {CODA}: convergence
+  diagnosis and output analysis for {MCMC}.
+\bibAnnoteFile{plummer_coda_2006}
+
+\bibitem[{Quintero and Andréoletti(2020)}]{quintero_tapestreejl_2020}
+Quintero, I. and J.~Andréoletti. 2020. Tapestree.jl.
+\bibAnnoteFile{quintero_tapestreejl_2020}
+
+\bibitem[{Quintero et~al.(2024)Quintero, Lartillot, and
+  Morlon}]{quintero_imbalanced_2024}
+Quintero, I., N.~Lartillot, and H.~Morlon. 2024. {\selectlanguage{en}Imbalanced
+  speciation pulses sustain the radiation of mammals}. Science 384:1007--1012.
+\bibAnnoteFile{quintero_imbalanced_2024}
+
+\bibitem[{{R Core Team}(2018)}]{r_core_team_r_2018}
+{R Core Team}. 2018. R: {A} language and environment for statistical computing.
+\bibAnnoteFile{r_core_team_r_2018}
+
+\bibitem[{Rabosky(2014)}]{rabosky_automatic_2014}
+Rabosky, D.~L. 2014. {\selectlanguage{en}Automatic {Detection} of {Key}
+  {Innovations}, {Rate} {Shifts}, and {Diversity}-{Dependence} on
+  {Phylogenetic} {Trees}}. PLOS ONE 9:e89543.
+\bibAnnoteFile{rabosky_automatic_2014}
+
+\bibitem[{Rambaut et~al.(2018)Rambaut, Drummond, Xie, Baele, and
+  Suchard}]{rambaut_posterior_2018}
+Rambaut, A., A.~J. Drummond, D.~Xie, G.~Baele, and M.~A. Suchard. 2018.
+  {\selectlanguage{en}Posterior {Summarization} in {Bayesian} {Phylogenetics}
+  {Using} {Tracer} 1.7}. Systematic Biology 67:901--904.
+\bibAnnoteFile{rambaut_posterior_2018}
+
+\bibitem[{Raup(1975)}]{raup_taxonomic_1975}
+Raup, D.~M. 1975. {\selectlanguage{en}Taxonomic diversity estimation using
+  rarefaction}. Paleobiology 1:333--342.
+\bibAnnoteFile{raup_taxonomic_1975}
+
+\bibitem[{Rigby and Stasinopoulos(2005)}]{rigby_generalized_2005}
+Rigby, R.~A. and D.~M. Stasinopoulos. 2005. {\selectlanguage{en}Generalized
+  {Additive} {Models} for {Location}, {Scale} and {Shape}}. Journal of the
+  Royal Statistical Society Series C: Applied Statistics 54:507--554.
+\bibAnnoteFile{rigby_generalized_2005}
+
+\bibitem[{Sepkoski(1981)}]{sepkoski_factor_1981}
+Sepkoski, J.~J. 1981. {\selectlanguage{en}A factor analytic description of the
+  {Phanerozoic} marine fossil record}. Paleobiology 7:36--53.
+\bibAnnoteFile{sepkoski_factor_1981}
+
+\bibitem[{Silvestro et~al.(2014)Silvestro, Schnitzler, Liow, Antonelli, and
+  Salamin}]{silvestro_bayesian_2014}
+Silvestro, D., J.~Schnitzler, L.~H. Liow, A.~Antonelli, and N.~Salamin. 2014.
+  Bayesian {Estimation} of {Speciation} and {Extinction} from {Incomplete}
+  {Fossil} {Occurrence} {Data}. Systematic Biology 63:349--367.
+\bibAnnoteFile{silvestro_bayesian_2014}
+
+\bibitem[{Stadler(2009)}]{stadler_incomplete_2009}
+Stadler, T. 2009. {\selectlanguage{en}On incomplete sampling under
+  birth–death models and connections to the sampling-based coalescent}.
+  Journal of Theoretical Biology 261:58--66.
+\bibAnnoteFile{stadler_incomplete_2009}
+
+\bibitem[{Stadler(2010)}]{stadler_sampling-through-time_2010}
+Stadler, T. 2010. {\selectlanguage{en}Sampling-through-time in birth–death
+  trees}. Journal of Theoretical Biology 267:396--404.
+\bibAnnoteFile{stadler_sampling-through-time_2010}
+
+\bibitem[{Stadler(2013)}]{stadler_recovering_2013}
+Stadler, T. 2013. {\selectlanguage{en}Recovering speciation and extinction
+  dynamics based on phylogenies}. J. Evol. Biol. 26:1203--1219.
+\bibAnnoteFile{stadler_recovering_2013}
+
+\bibitem[{Stadler et~al.(2018)Stadler, Gavryushkina, Warnock, Drummond, and
+  Heath}]{stadler_fossilized_2018}
+Stadler, T., A.~Gavryushkina, R.~C. Warnock, A.~J. Drummond, and T.~A. Heath.
+  2018. {\selectlanguage{en}The fossilized birth-death model for the analysis
+  of stratigraphic range data under different speciation modes}. Journal of
+  Theoretical Biology 447:41--55.
+\bibAnnoteFile{stadler_fossilized_2018}
+
+\bibitem[{Stadler et~al.(2024)Stadler, Magnus, Vaughan, Barido-Sottani,
+  Bošková, Huisman, and Pečerska}]{stadler_decoding_2024}
+Stadler, T., C.~Magnus, T.~G. Vaughan, J.~Barido-Sottani, V.~Bošková,
+  J.~Huisman, and J.~Pečerska. 2024. {\selectlanguage{en}Decoding {Genomes}:
+  {From} {Sequences} to {Phylodynamics}}. ETH Zurich.
+\bibAnnoteFile{stadler_decoding_2024}
+
+\bibitem[{Starrfelt and Liow(2016)}]{starrfelt_how_2016}
+Starrfelt, J. and L.~H. Liow. 2016. {\selectlanguage{en}How many dinosaur
+  species were there? {Fossil} bias and true richness estimated using a
+  {Poisson} sampling model}. Philosophical Transactions of the Royal Society B:
+  Biological Sciences 371:20150219.
+\bibAnnoteFile{starrfelt_how_2016}
+
+\bibitem[{Steeman et~al.(2009)Steeman, Hebsgaard, Fordyce, Ho, Rabosky,
+  Nielsen, Rahbek, Glenner, Sørensen, and Willerslev}]{steeman_radiation_2009}
+Steeman, M.~E., M.~B. Hebsgaard, R.~E. Fordyce, S.~Y.~W. Ho, D.~L. Rabosky,
+  R.~Nielsen, C.~Rahbek, H.~Glenner, M.~V. Sørensen, and E.~Willerslev. 2009.
+  Radiation of {Extant} {Cetaceans} {Driven} by {Restructuring} of the
+  {Oceans}. Systematic Biology 58:573--585.
+\bibAnnoteFile{steeman_radiation_2009}
+
+\bibitem[{Tanner and Wong(1987)}]{tanner_calculation_1987}
+Tanner, M.~A. and W.~H. Wong. 1987. The {Calculation} of {Posterior}
+  {Distributions} by {Data} {Augmentation}. Journal of the American Statistical
+  Association 82:548.
+\bibAnnoteFile{tanner_calculation_1987}
+
+\bibitem[{Uhen et~al.(2023)Uhen, Allen, Behboudi, Clapham, Dunne, Hendy,
+  Holroyd, Hopkins, Mannion, Novack-Gottshall, Pimiento, and
+  Wagner}]{uhen_paleobiology_2023}
+Uhen, M.~D., B.~Allen, N.~Behboudi, M.~E. Clapham, E.~Dunne, A.~Hendy, P.~A.
+  Holroyd, M.~Hopkins, P.~Mannion, P.~Novack-Gottshall, C.~Pimiento, and
+  P.~Wagner. 2023. Paleobiology {Database} {User} {Guide} {Version} 1.0.
+  PaleoBios 40.
+\bibAnnoteFile{uhen_paleobiology_2023}
+
+\bibitem[{Vaughan et~al.(2019)Vaughan, Leventhal, Rasmussen, Drummond, Welch,
+  and Stadler}]{vaughan_estimating_2019}
+Vaughan, T.~G., G.~E. Leventhal, D.~A. Rasmussen, A.~J. Drummond, D.~Welch, and
+  T.~Stadler. 2019. {\selectlanguage{en}Estimating {Epidemic} {Incidence} and
+  {Prevalence} from {Genomic} {Data}}. Molecular Biology and Evolution
+  36:1804--1816.
+\bibAnnoteFile{vaughan_estimating_2019}
+
+\bibitem[{Wagner and Marcot(2013)}]{wagner_modelling_2013}
+Wagner, P.~J. and J.~D. Marcot. 2013. {\selectlanguage{en}Modelling
+  distributions of fossil sampling rates over time, space and taxa: assessment
+  and implications for macroevolutionary studies}. Methods in Ecology and
+  Evolution 4:703--713.
+\bibAnnoteFile{wagner_modelling_2013}
+
+\bibitem[{Wright et~al.(2022)Wright, Bapst, Barido-Sottani, and
+  Warnock}]{wright_integrating_2022}
+Wright, A.~M., D.~W. Bapst, J.~Barido-Sottani, and R.~C. Warnock. 2022.
+  {\selectlanguage{en}Integrating {Fossil} {Observations} {Into}
+  {Phylogenetics} {Using} the {Fossilized} {Birth}–{Death} {Model}}. Annual
+  Review of Ecology, Evolution, and Systematics 53:251--273.
+\bibAnnoteFile{wright_integrating_2022}
+
+\bibitem[{Zarebski et~al.(2025)Zarebski, Zwaans, Gutierrez, du~Plessis, and
+  Pybus}]{zarebski_estimating_2025}
+Zarebski, A.~E., A.~Zwaans, B.~Gutierrez, L.~du~Plessis, and O.~G. Pybus. 2025.
+  Estimating epidemic dynamics with genomic and time series data. Journal of
+  The Royal Society Interface 22:20240632.
+\bibAnnoteFile{zarebski_estimating_2025}
+
+\end{thebibliography}

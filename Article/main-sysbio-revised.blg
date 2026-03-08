@@ -1,0 +1,48 @@
+This is BibTeX, Version 0.99d (TeX Live 2021)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: main-sysbio-revised.aux
+The style file: sysbio.bst
+Database file #1: OBDD_Cetacea.bib
+Warning--I didn't find a database entry for "quintero_rise_2025"
+You've used 62 entries,
+            2858 wiz_defined-function locations,
+            967 strings with 17982 characters,
+and the built_in function-call counts, 41295 in all, are:
+= -- 3434
+> -- 2330
+< -- 27
++ -- 792
+- -- 702
+* -- 3377
+:= -- 6442
+add.period$ -- 243
+call.type$ -- 62
+change.case$ -- 542
+chr.to.int$ -- 62
+cite$ -- 124
+duplicate$ -- 2856
+empty$ -- 2733
+format.name$ -- 892
+if$ -- 8227
+int.to.chr$ -- 1
+int.to.str$ -- 1
+missing$ -- 645
+newline$ -- 259
+num.names$ -- 248
+pop$ -- 1080
+preamble$ -- 1
+purify$ -- 482
+quote$ -- 0
+skip$ -- 839
+stack$ -- 0
+substring$ -- 1996
+swap$ -- 1323
+text.length$ -- 1
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 552
+warning$ -- 0
+while$ -- 280
+width$ -- 0
+write$ -- 742
+(There was 1 warning)
