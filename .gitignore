@@ -4,10 +4,11 @@ Cetacea/Data/Cetacea_Safe_posterior.trees
 Cetacea/Data/Cetacea_Dangerous_posterior.trees
 Cetacea/Data/Cetacea_Risky_posterior.trees
 Cetacea/outputs
-Calibration/Calibration_plots_COBD.nb.html
-Calibration/Calibration_plots_OBDD.nb.html
 Calibration/outputs
-OBDD_illustration_figure.nb.html
+*.nb.html
+
+# Unrelated biogeography figures (not used by OBDD manuscript)
+Article/Images/MCC_tree_biogeography_*.pdf
 
 # LaTeX compilation artifacts
 Article/*.aux
