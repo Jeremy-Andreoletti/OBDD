@@ -8,3 +8,29 @@ Calibration/Calibration_plots_COBD.nb.html
 Calibration/Calibration_plots_OBDD.nb.html
 Calibration/outputs
 OBDD_illustration_figure.nb.html
+
+# LaTeX compilation artifacts
+Article/*.aux
+Article/*.bbl
+Article/*.blg
+Article/*.fdb_latexmk
+Article/*.fls
+Article/*.log
+Article/*.out
+Article/*.synctex.gz
+Article/*.toc
+
+# Response to reviewers (source + compiled, kept private for anonymity)
+Article/response_to_reviewers.tex
+Article/response_to_reviewers.pdf
+Article/Systbio_reviews/
+
+# OS / editor / language artifacts
+.DS_Store
+*~
+*.swp
+.Rhistory
+.RData
+.ipynb_checkpoints/
+__pycache__/
+*.pyc
